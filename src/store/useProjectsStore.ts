@@ -54,7 +54,7 @@ function applySnapshot(snap: ProjectSnapshot | null) {
   };
   useEntityStore.setState({ entities: data.entities });
   useProjectStore.setState({
-    meta: { notes: '', ...data.meta },
+    meta: { ...data.meta },
     features: data.features,
     milestones: data.milestones ?? [],
     scope: data.scope,
