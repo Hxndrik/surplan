@@ -154,6 +154,8 @@ export function parseSql(sql: string): ParseResult {
       updatedAt: Date.now(),
       tags: [],
       columns,
+      updatedAt: Date.now(),
+      tags: [],
     });
 
     colorIdx++;
@@ -279,6 +281,8 @@ export function parseJsonToEntity(json: string, entityName: string, colorIndex =
       updatedAt: Date.now(),
       tags: [],
       columns,
+      updatedAt: Date.now(),
+      tags: [],
     },
     error: null,
     sampleCount: samples.length,
@@ -359,6 +363,8 @@ export function parseCsvToEntity(csv: string, entityName: string, colorIndex = 0
       updatedAt: Date.now(),
       tags: [],
       columns,
+      updatedAt: Date.now(),
+      tags: [],
     },
     error: null,
     sampleCount,

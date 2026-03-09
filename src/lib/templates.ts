@@ -29,6 +29,7 @@ function buildEntity(template: EntityTemplate): Omit<Entity, 'id' | 'createdAt'>
     collapsed: false,
     updatedAt: Date.now(),
     tags: [],
+    updatedAt: Date.now(),
     columns: template.columns.map((c, i) => ({
       id: createId(),
       name: c.name,

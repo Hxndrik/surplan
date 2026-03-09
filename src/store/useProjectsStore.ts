@@ -46,7 +46,7 @@ function captureSnapshot(): ProjectSnapshot {
 function applySnapshot(snap: ProjectSnapshot | null) {
   const data = snap ?? {
     entities: [],
-    meta: { name: 'Untitled Project', description: '', techStackNotes: '' },
+    meta: { name: 'Untitled Project', description: '', techStackNotes: '', notes: '' },
     features: [],
     milestones: [],
     scope: [],

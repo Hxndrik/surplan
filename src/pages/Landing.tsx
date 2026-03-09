@@ -127,6 +127,10 @@ export function Landing() {
     }
   }, [theme]);
 
+  useEffect(() => {
+    document.title = 'surplan — Free Developer Planning Tool | Schema Designer, API Planner & Feature Tracker';
+  }, []);
+
   return (
     <div className="min-h-screen bg-bg-primary text-text-primary">
       {/* Nav */}

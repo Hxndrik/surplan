@@ -430,7 +430,8 @@ export function ErdView({ entities, onEntityFocus }: ErdViewProps) {
     a.download = 'erd.svg';
     a.click();
     URL.revokeObjectURL(url);
-  }, [entities, positions, edges, getEdgeData]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [entities, positions]);
   const handleAutoLayout = useCallback(() => {
     const newPositions = autoLayoutFK(entities);
     setPositions(newPositions);

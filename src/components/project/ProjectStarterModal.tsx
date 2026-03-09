@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { PROJECT_STARTERS, type ProjectStarter } from '../../lib/templates';
 import { useEntityStore } from '../../store/useEntityStore';
 import { useProjectStore } from '../../store/useProjectStore';
+import type { AuthScheme } from '../../types';
 
 interface ProjectStarterModalProps {
   onClose: () => void;
@@ -54,7 +55,7 @@ export function ProjectStarterModal({ onClose }: ProjectStarterModalProps) {
         method: ep.method,
         path: ep.path,
         description: ep.description,
-        auth: (ep.auth ?? 'none') as import('../../types').AuthScheme,
+        auth: (ep.auth ?? 'none') as AuthScheme,
       });
     });
 
