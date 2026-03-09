@@ -4,7 +4,7 @@ import { useEntityStore } from '../../store/useEntityStore';
 import { useUIStore } from '../../store/useUIStore';
 import { ScopeSection } from './ScopeSection';
 import { InlineEdit } from '../shared/InlineEdit';
-import { backupProject, exportProjectMarkdown, exportOpenApi, exportHtmlDocs, exportGithubIssues, exportChangelog, generateMultiAgentPrompt } from '../../lib/backup';
+import { backupProject, exportProjectMarkdown, exportOpenApi, exportHtmlDocs, exportGithubIssues, exportChangelog } from '../../lib/backup';
 import { MultiAgentPromptModal } from './MultiAgentPromptModal';
 import { ProjectStarterModal } from './ProjectStarterModal';
 import { useToast } from '../../hooks/useToast';
@@ -56,7 +56,6 @@ export function ProjectOverview() {
 
   const doneFeatures = features.filter((f) => f.done).length;
   const inProgressFeatures = features.filter((f) => f.inProgress && !f.done).length;
-  const featuresWithNotes = features.filter((f) => f.notes?.trim()).length;
   const blockedFeatures = features.filter((f) =>
     !f.done && (f.blockedBy ?? []).some((bid) => features.find((bf) => bf.id === bid && !bf.done))
   ).length;
@@ -357,18 +356,8 @@ export function ProjectOverview() {
 
   // Status summary copy
   const [summaryCopied, setSummaryCopied] = useState(false);
-  const [promptCopied, setPromptCopied] = useState(false);
   const [showPromptModal, setShowPromptModal] = useState(false);
   const [showStarterModal, setShowStarterModal] = useState(false);
-
-  const copyMultiAgentPrompt = () => {
-    const md = generateMultiAgentPrompt();
-    navigator.clipboard.writeText(md).then(() => {
-      setPromptCopied(true);
-      toast.success('Claude Code prompt copied to clipboard!');
-      setTimeout(() => setPromptCopied(false), 3000);
-    }).catch(() => toast.error('Failed to copy to clipboard'));
-  };
 
   // Listen for external trigger (from CommandPalette)
   // We need a stable ref to call copyStatusSummary from the event listener
@@ -1750,11 +1739,7 @@ export function ProjectOverview() {
           <button
             type="button"
             onClick={() => setShowPromptModal(true)}
-            className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border transition-colors cursor-pointer ${
-              promptCopied
-                ? 'bg-accent/10 text-accent border-accent/40'
-                : 'bg-bg-secondary border-border-default hover:border-accent/50 hover:text-accent text-text-secondary'
-            }`}
+            className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border transition-colors cursor-pointer bg-bg-secondary border-border-default hover:border-accent/50 hover:text-accent text-text-secondary"
             title="Preview and copy a ready-to-paste Claude Code multi-agent build prompt"
           >
             <span>✦</span>

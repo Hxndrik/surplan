@@ -5,7 +5,7 @@ import { useHistoryStore } from '../../store/useHistoryStore';
 import { useEntityStore } from '../../store/useEntityStore';
 import { useUIStore } from '../../store/useUIStore';
 import { InlineEdit } from '../shared/InlineEdit';
-import { exportFeaturesCSV, importFeaturesCSV } from '../../lib/backup';
+import { importFeaturesCSV } from '../../lib/backup';
 import { useToast } from '../../hooks/useToast';
 
 const TAB_TITLES: Record<string, string> = {

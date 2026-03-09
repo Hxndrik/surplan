@@ -54,7 +54,7 @@ function applySnapshot(snap: ProjectSnapshot | null) {
   };
   useEntityStore.setState({ entities: data.entities });
   useProjectStore.setState({
-    meta: data.meta,
+    meta: { notes: '', ...data.meta },
     features: data.features,
     milestones: data.milestones ?? [],
     scope: data.scope,
@@ -98,7 +98,7 @@ export const useProjectsStore = create<ProjectsStore>()(
         useHistoryStore.setState({ isReverting: true, past: [], future: [] });
         applySnapshot({
           entities: [],
-          meta: { name, description: '', techStackNotes: '' },
+          meta: { name, description: '', techStackNotes: '', notes: '' },
           features: [],
           milestones: [],
           scope: [],

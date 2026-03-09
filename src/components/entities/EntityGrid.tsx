@@ -308,7 +308,7 @@ export function EntityGrid({ onExport }: EntityGridProps) {
         <div className="flex-1" />
 
         {/* Sort */}
-        {view === 'grid' && entities.length > 1 && view !== 'matrix' && (
+        {view === 'grid' && entities.length > 1 && (
           <select
             value={sortEntities}
             onChange={(e) => setSortEntities(e.target.value as typeof sortEntities)}
@@ -324,7 +324,7 @@ export function EntityGrid({ onExport }: EntityGridProps) {
         )}
 
         {/* Collapse / Expand all */}
-        {view === 'grid' && entities.length > 0 && view !== 'matrix' && (
+        {view === 'grid' && entities.length > 0 && (
           <div className="flex items-center border border-border-default rounded-lg overflow-hidden">
             <button
               type="button"

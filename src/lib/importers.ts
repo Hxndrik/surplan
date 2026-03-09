@@ -151,6 +151,8 @@ export function parseSql(sql: string): ParseResult {
       description: '',
       color: ENTITY_COLORS[colorIdx % ENTITY_COLORS.length],
       collapsed: false,
+      updatedAt: Date.now(),
+      tags: [],
       columns,
     });
 
@@ -274,6 +276,8 @@ export function parseJsonToEntity(json: string, entityName: string, colorIndex =
       description: '',
       color: ENTITY_COLORS[colorIndex % ENTITY_COLORS.length],
       collapsed: false,
+      updatedAt: Date.now(),
+      tags: [],
       columns,
     },
     error: null,
@@ -352,6 +356,8 @@ export function parseCsvToEntity(csv: string, entityName: string, colorIndex = 0
       description: '',
       color: ENTITY_COLORS[colorIndex % ENTITY_COLORS.length],
       collapsed: false,
+      updatedAt: Date.now(),
+      tags: [],
       columns,
     },
     error: null,

@@ -54,7 +54,7 @@ export function ProjectStarterModal({ onClose }: ProjectStarterModalProps) {
         method: ep.method,
         path: ep.path,
         description: ep.description,
-        auth: ep.auth ?? 'none',
+        auth: (ep.auth ?? 'none') as import('../../types').AuthScheme,
       });
     });
 
