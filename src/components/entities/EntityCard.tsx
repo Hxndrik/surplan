@@ -77,7 +77,7 @@ export const EntityCard = memo(function EntityCard({ entity, dragHandle, highlig
 
   return (
     <div
-      className="bg-bg-secondary border border-border-default rounded-lg overflow-hidden hover:border-border-active transition-colors animate-fade-in-up"
+      className="bg-bg-secondary border border-border-default rounded-lg hover:border-border-active transition-colors animate-fade-in-up"
       style={{ borderLeftColor: entity.color, borderLeftWidth: '3px' }}
     >
       <EntityCardHeader
