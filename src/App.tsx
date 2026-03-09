@@ -28,20 +28,32 @@ function PlannerApp() {
   const activeTab = useUIStore((s) => s.activeTab);
   const setActiveTab = useUIStore((s) => s.setActiveTab);
   const theme = useUIStore((s) => s.theme);
-  const toggleTheme = useUIStore((s) => s.toggleTheme);
+  const setTheme = useUIStore((s) => s.setTheme);
   const addEntity = useEntityStore((s) => s.addEntity);
   const addFeature = useProjectStore((s) => s.addFeature);
   const addEndpoint = useProjectStore((s) => s.addEndpoint);
   const projectName = useProjectStore((s) => s.meta.name);
   const features = useProjectStore((s) => s.features);
 
-  // Sync theme class on <html>
+  // Sync theme class on <html>, resolving 'system' via matchMedia
   useEffect(() => {
     const root = document.documentElement;
-    if (theme === 'light') {
-      root.classList.add('light');
-    } else {
-      root.classList.remove('light');
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+
+    const apply = () => {
+      const resolved = theme === 'system' ? (mq.matches ? 'dark' : 'light') : theme;
+      if (resolved === 'light') {
+        root.classList.add('light');
+      } else {
+        root.classList.remove('light');
+      }
+    };
+
+    apply();
+
+    if (theme === 'system') {
+      mq.addEventListener('change', apply);
+      return () => mq.removeEventListener('change', apply);
     }
   }, [theme]);
 
@@ -139,10 +151,11 @@ function PlannerApp() {
         }
       }
 
-      // Ctrl+Shift+L — toggle light/dark theme
+      // Ctrl+Shift+L — cycle theme (system → light → dark → system)
       if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'L') {
         e.preventDefault();
-        toggleTheme();
+        const next = theme === 'system' ? 'light' : theme === 'light' ? 'dark' : 'system';
+        setTheme(next);
         return;
       }
 
@@ -165,7 +178,7 @@ function PlannerApp() {
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [activeTab, setActiveTab, undo, redo, addEntity, addFeature, addEndpoint, openExport, setShowFindReplace, toggleTheme]);
+  }, [activeTab, setActiveTab, undo, redo, addEntity, addFeature, addEndpoint, openExport, setShowFindReplace, theme, setTheme]);
 
   // Listen for export events from command palette
   useEffect(() => {
@@ -204,7 +217,7 @@ function PlannerApp() {
 
   return (
     <div className="flex h-screen overflow-hidden">
-      <Sidebar onCommandPalette={() => setShowCommandPalette(true)} onHelp={() => setShowHelp(true)} onToggleTheme={toggleTheme} theme={theme} />
+      <Sidebar onCommandPalette={() => setShowCommandPalette(true)} onHelp={() => setShowHelp(true)} onSetTheme={setTheme} theme={theme} />
       <div className="flex-1 flex flex-col min-w-0">
         <Header onImport={() => setShowImport(true)} onExport={() => openExport()} />
         <MainContent onExport={() => openExport()} />

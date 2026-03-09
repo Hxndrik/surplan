@@ -20,14 +20,26 @@ interface PageLayoutProps {
 export function PageLayout({ children, title, subtitle, badge }: PageLayoutProps) {
   const { pathname } = useLocation();
   const theme = useUIStore((s) => s.theme);
-  const toggleTheme = useUIStore((s) => s.toggleTheme);
+  const setTheme = useUIStore((s) => s.setTheme);
 
   useEffect(() => {
     const root = document.documentElement;
-    if (theme === 'light') {
-      root.classList.add('light');
-    } else {
-      root.classList.remove('light');
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+
+    const apply = () => {
+      const resolved = theme === 'system' ? (mq.matches ? 'dark' : 'light') : theme;
+      if (resolved === 'light') {
+        root.classList.add('light');
+      } else {
+        root.classList.remove('light');
+      }
+    };
+
+    apply();
+
+    if (theme === 'system') {
+      mq.addEventListener('change', apply);
+      return () => mq.removeEventListener('change', apply);
     }
   }, [theme]);
 
@@ -58,14 +70,21 @@ export function PageLayout({ children, title, subtitle, badge }: PageLayoutProps
             ))}
           </nav>
           <div className="flex items-center gap-2">
-            {/* Theme toggle */}
+            {/* Theme toggle — cycles system → light → dark */}
             <button
               type="button"
-              onClick={toggleTheme}
-              title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
+              onClick={() => {
+                const next = theme === 'system' ? 'light' : theme === 'light' ? 'dark' : 'system';
+                setTheme(next);
+              }}
+              title={theme === 'system' ? 'Theme: System (click for Light)' : theme === 'light' ? 'Theme: Light (click for Dark)' : 'Theme: Dark (click for System)'}
               className="w-8 h-8 flex items-center justify-center rounded-lg text-text-muted hover:text-text-primary hover:bg-bg-hover transition-colors"
             >
-              {theme === 'light' ? (
+              {theme === 'system' ? (
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 17.25v1.007a3 3 0 0 1-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0 1 15 18.257V17.25m6-12V15a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 15V5.25A2.25 2.25 0 0 1 5.25 3h13.5A2.25 2.25 0 0 1 21 5.25Z" />
+                </svg>
+              ) : theme === 'light' ? (
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" />
                 </svg>
