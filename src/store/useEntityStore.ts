@@ -90,7 +90,7 @@ export const useEntityStore = create<EntityStore>()(
         set((state) => ({
           entities: [
             ...state.entities,
-            { tags: [], ...template, id, createdAt: now, updatedAt: now },
+            { ...template, id, createdAt: now, updatedAt: now },
           ],
         }));
         return id;

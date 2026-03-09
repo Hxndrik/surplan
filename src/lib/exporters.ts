@@ -1021,7 +1021,6 @@ function exportGraphQL(entities: Entity[]): string {
     lines.push('type Mutation {');
     entities.forEach((entity) => {
       const typeName = toPascalCase(entity.name);
-      const singular = snakeToCamel(entity.name);
       lines.push(`  create${typeName}(input: Create${typeName}Input!): ${typeName}!`);
       lines.push(`  update${typeName}(id: ID!, input: Update${typeName}Input!): ${typeName}`);
       lines.push(`  delete${typeName}(id: ID!): Boolean!`);

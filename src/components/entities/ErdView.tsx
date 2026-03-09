@@ -20,18 +20,6 @@ const LAYOUT_XGAP = 260;
 const LAYOUT_YGAP = 32;
 const LAYOUT_PAD = 20;
 
-// Simple grid layout (fallback)
-function autoLayout(entities: Entity[]): Map<string, { x: number; y: number }> {
-  const positions = new Map<string, { x: number; y: number }>();
-  const cols = Math.max(1, Math.ceil(Math.sqrt(entities.length)));
-  entities.forEach((e, i) => {
-    const col = i % cols;
-    const row = Math.floor(i / cols);
-    positions.set(e.id, { x: col * LAYOUT_XGAP + LAYOUT_PAD, y: row * 220 + LAYOUT_PAD });
-  });
-  return positions;
-}
-
 // FK-aware topological layout: referenced (master) entities come first
 function autoLayoutFK(entities: Entity[]): Map<string, { x: number; y: number }> {
   if (entities.length === 0) return new Map();
@@ -296,6 +284,74 @@ export function ErdView({ entities, onEntityFocus }: ErdViewProps) {
   const handleZoomOut = () => setScale((s) => Math.max(MIN_SCALE, +(s - SCALE_STEP).toFixed(2)));
   const handleReset = () => { setScale(1); setPan({ x: 0, y: 0 }); };
 
+  // Build FK edges
+  const edges = useMemo(() => {
+    const lines: { fromId: string; toId: string; fromColName: string; color: string }[] = [];
+    entities.forEach((e) => {
+      e.columns.forEach((c) => {
+        if (c.references) {
+          lines.push({
+            fromId: e.id,
+            toId: c.references.entityId,
+            fromColName: c.name,
+            color: e.color,
+          });
+        }
+      });
+    });
+    return lines;
+  }, [entities]);
+
+  // Entities directly connected to the hovered entity via FK
+  const relatedIds = useMemo(() => {
+    if (!hoveredId) return new Set<string>();
+    const ids = new Set<string>([hoveredId]);
+    edges.forEach((e) => {
+      if (e.fromId === hoveredId) ids.add(e.toId);
+      if (e.toId === hoveredId) ids.add(e.fromId);
+    });
+    return ids;
+  }, [hoveredId, edges]);
+
+  const getEdgeData = useCallback((fromId: string, toId: string, fromColName: string) => {
+    const from = positions.get(fromId);
+    const to = positions.get(toId);
+    if (!from || !to) return null;
+    const fromE = entities.find((e) => e.id === fromId);
+    const toE = entities.find((e) => e.id === toId);
+    if (!fromE || !toE) return null;
+
+    // Anchor at FK column row (clamped to visible rows)
+    const fromColIdx = Math.max(0, Math.min(7, fromE.columns.findIndex((c) => c.name === fromColName)));
+    const toPKIdx = Math.max(0, Math.min(7, toE.columns.findIndex((c) => c.primaryKey)));
+
+    const fromY = from.y + CARD_HEADER_HEIGHT + fromColIdx * ROW_HEIGHT + ROW_HEIGHT / 2;
+    const toY = to.y + CARD_HEADER_HEIGHT + toPKIdx * ROW_HEIGHT + ROW_HEIGHT / 2;
+
+    // Choose connection sides based on relative x position
+    const fromCenterX = from.x + CARD_WIDTH / 2;
+    const toCenterX = to.x + CARD_WIDTH / 2;
+
+    let fx: number, tx: number, dir: number;
+    if (toCenterX >= fromCenterX) {
+      fx = from.x + CARD_WIDTH;
+      tx = to.x;
+      dir = 1;
+    } else {
+      fx = from.x;
+      tx = to.x + CARD_WIDTH;
+      dir = -1;
+    }
+
+    const gap = Math.max(60, Math.abs(tx - fx));
+    const cx = gap * 0.45;
+
+    return {
+      path: `M ${fx} ${fromY} C ${fx + dir * cx} ${fromY}, ${tx - dir * cx} ${toY}, ${tx} ${toY}`,
+      fx, fromY, tx, toY, dir,
+    };
+  }, [positions, entities]);
+
   const handleExportSVG = useCallback(() => {
     if (entities.length === 0) return;
     const pad = 32;
@@ -411,74 +467,6 @@ export function ErdView({ entities, onEntityFocus }: ErdViewProps) {
     () => Math.min(MM_W / Math.max(canvasWidth, 1), MM_H / Math.max(canvasHeight, 1)),
     [canvasWidth, canvasHeight]
   );
-
-  // Build FK edges
-  const edges = useMemo(() => {
-    const lines: { fromId: string; toId: string; fromColName: string; color: string }[] = [];
-    entities.forEach((e) => {
-      e.columns.forEach((c) => {
-        if (c.references) {
-          lines.push({
-            fromId: e.id,
-            toId: c.references.entityId,
-            fromColName: c.name,
-            color: e.color,
-          });
-        }
-      });
-    });
-    return lines;
-  }, [entities]);
-
-  // Entities directly connected to the hovered entity via FK
-  const relatedIds = useMemo(() => {
-    if (!hoveredId) return new Set<string>();
-    const ids = new Set<string>([hoveredId]);
-    edges.forEach((e) => {
-      if (e.fromId === hoveredId) ids.add(e.toId);
-      if (e.toId === hoveredId) ids.add(e.fromId);
-    });
-    return ids;
-  }, [hoveredId, edges]);
-
-  const getEdgeData = (fromId: string, toId: string, fromColName: string) => {
-    const from = positions.get(fromId);
-    const to = positions.get(toId);
-    if (!from || !to) return null;
-    const fromE = entities.find((e) => e.id === fromId);
-    const toE = entities.find((e) => e.id === toId);
-    if (!fromE || !toE) return null;
-
-    // Anchor at FK column row (clamped to visible rows)
-    const fromColIdx = Math.max(0, Math.min(7, fromE.columns.findIndex((c) => c.name === fromColName)));
-    const toPKIdx = Math.max(0, Math.min(7, toE.columns.findIndex((c) => c.primaryKey)));
-
-    const fromY = from.y + CARD_HEADER_HEIGHT + fromColIdx * ROW_HEIGHT + ROW_HEIGHT / 2;
-    const toY = to.y + CARD_HEADER_HEIGHT + toPKIdx * ROW_HEIGHT + ROW_HEIGHT / 2;
-
-    // Choose connection sides based on relative x position
-    const fromCenterX = from.x + CARD_WIDTH / 2;
-    const toCenterX = to.x + CARD_WIDTH / 2;
-
-    let fx: number, tx: number, dir: number;
-    if (toCenterX >= fromCenterX) {
-      fx = from.x + CARD_WIDTH;
-      tx = to.x;
-      dir = 1;
-    } else {
-      fx = from.x;
-      tx = to.x + CARD_WIDTH;
-      dir = -1;
-    }
-
-    const gap = Math.max(60, Math.abs(tx - fx));
-    const cx = gap * 0.45;
-
-    return {
-      path: `M ${fx} ${fromY} C ${fx + dir * cx} ${fromY}, ${tx - dir * cx} ${toY}, ${tx} ${toY}`,
-      fx, fromY, tx, toY, dir,
-    };
-  };
 
   const cursorStyle = dragging ? 'grabbing' : panning ? 'grabbing' : 'grab';
 
