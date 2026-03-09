@@ -27,6 +27,7 @@ function buildEntity(template: EntityTemplate): Omit<Entity, 'id' | 'createdAt'>
     description: template.description,
     color: template.color,
     collapsed: false,
+    updatedAt: Date.now(),
     tags: [],
     updatedAt: Date.now(),
     columns: template.columns.map((c, i) => ({
