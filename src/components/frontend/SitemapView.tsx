@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import { useFrontendStore } from '../../store/useFrontendStore';
-import type { Page, PageStatus } from '../../types';
+import type { PageStatus } from '../../types';
 
 const STATUS_COLORS: Record<PageStatus, string> = {
   planned: '#6366f1',

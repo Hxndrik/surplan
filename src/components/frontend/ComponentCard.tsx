@@ -38,8 +38,6 @@ export function ComponentCard({ component, depth = 0 }: ComponentCardProps) {
   const children = allComponents.filter((c) => c.parentId === component.id);
 
   const [expanded, setExpanded] = useState(false);
-  const [showEntityPicker, setShowEntityPicker] = useState(false);
-
   const linkedEntity = entities.find((e) => e.id === component.entityRef);
 
   const handleGenerateProps = () => {
@@ -72,7 +70,7 @@ export function ComponentCard({ component, depth = 0 }: ComponentCardProps) {
           <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: KIND_COLORS[component.kind] }} />
           <InlineEdit
             value={component.name}
-            onChange={(v) => updateComponent(component.id, { name: v })}
+            onSave={(v: string) => updateComponent(component.id, { name: v })}
             className="text-xs font-semibold text-text-primary flex-1"
           />
           <span className="text-[9px] px-1.5 py-0.5 rounded bg-bg-tertiary text-text-muted">{component.kind}</span>
@@ -104,7 +102,7 @@ export function ComponentCard({ component, depth = 0 }: ComponentCardProps) {
           <div className="border-t border-border-default px-3 py-2 space-y-3 bg-bg-primary/30">
             <InlineEdit
               value={component.description}
-              onChange={(v) => updateComponent(component.id, { description: v })}
+              onSave={(v: string) => updateComponent(component.id, { description: v })}
               placeholder="Component description..."
               className="text-[11px] text-text-muted block w-full"
             />
@@ -142,10 +140,10 @@ export function ComponentCard({ component, depth = 0 }: ComponentCardProps) {
                   </div>
                   {component.props.map((p) => (
                     <div key={p.id} className="grid grid-cols-[1fr_1fr_40px_1fr_20px] gap-1 items-center bg-bg-tertiary rounded px-1 py-0.5">
-                      <InlineEdit value={p.name} onChange={(v) => updateComponentProp(component.id, p.id, { name: v })} placeholder="name" className="text-[10px] text-text-secondary" />
-                      <InlineEdit value={p.type} onChange={(v) => updateComponentProp(component.id, p.id, { type: v })} placeholder="string" className="text-[10px] text-accent font-mono" />
+                      <InlineEdit value={p.name} onSave={(v: string) => updateComponentProp(component.id, p.id, { name: v })} placeholder="name" className="text-[10px] text-text-secondary" />
+                      <InlineEdit value={p.type} onSave={(v: string) => updateComponentProp(component.id, p.id, { type: v })} placeholder="string" className="text-[10px] text-accent font-mono" />
                       <input type="checkbox" checked={p.required} onChange={(e) => updateComponentProp(component.id, p.id, { required: e.target.checked })} className="w-3 h-3" />
-                      <InlineEdit value={p.defaultValue} onChange={(v) => updateComponentProp(component.id, p.id, { defaultValue: v })} placeholder="—" className="text-[10px] text-text-muted" />
+                      <InlineEdit value={p.defaultValue} onSave={(v: string) => updateComponentProp(component.id, p.id, { defaultValue: v })} placeholder="—" className="text-[10px] text-text-muted" />
                       <button onClick={() => removeComponentProp(component.id, p.id)} className="text-danger/60 hover:text-danger text-[10px] cursor-pointer">×</button>
                     </div>
                   ))}
@@ -161,8 +159,8 @@ export function ComponentCard({ component, depth = 0 }: ComponentCardProps) {
               </div>
               {component.events.map((ev) => (
                 <div key={ev.id} className="grid grid-cols-[1fr_1fr_20px] gap-1 items-center bg-bg-tertiary rounded px-1 py-0.5">
-                  <InlineEdit value={ev.name} onChange={(v) => updateComponentEvent(component.id, ev.id, { name: v })} placeholder="onClick" className="text-[10px] text-text-secondary" />
-                  <InlineEdit value={ev.payload} onChange={(v) => updateComponentEvent(component.id, ev.id, { payload: v })} placeholder="void" className="text-[10px] text-accent font-mono" />
+                  <InlineEdit value={ev.name} onSave={(v: string) => updateComponentEvent(component.id, ev.id, { name: v })} placeholder="onClick" className="text-[10px] text-text-secondary" />
+                  <InlineEdit value={ev.payload} onSave={(v: string) => updateComponentEvent(component.id, ev.id, { payload: v })} placeholder="void" className="text-[10px] text-accent font-mono" />
                   <button onClick={() => removeComponentEvent(component.id, ev.id)} className="text-danger/60 hover:text-danger text-[10px] cursor-pointer">×</button>
                 </div>
               ))}
@@ -176,9 +174,9 @@ export function ComponentCard({ component, depth = 0 }: ComponentCardProps) {
               </div>
               {component.stateFields.map((sf) => (
                 <div key={sf.id} className="grid grid-cols-[1fr_1fr_1fr_20px] gap-1 items-center bg-bg-tertiary rounded px-1 py-0.5">
-                  <InlineEdit value={sf.name} onChange={(v) => updateComponentState(component.id, sf.id, { name: v })} placeholder="isOpen" className="text-[10px] text-text-secondary" />
-                  <InlineEdit value={sf.type} onChange={(v) => updateComponentState(component.id, sf.id, { type: v })} placeholder="boolean" className="text-[10px] text-accent font-mono" />
-                  <InlineEdit value={sf.initialValue} onChange={(v) => updateComponentState(component.id, sf.id, { initialValue: v })} placeholder="false" className="text-[10px] text-text-muted" />
+                  <InlineEdit value={sf.name} onSave={(v: string) => updateComponentState(component.id, sf.id, { name: v })} placeholder="isOpen" className="text-[10px] text-text-secondary" />
+                  <InlineEdit value={sf.type} onSave={(v: string) => updateComponentState(component.id, sf.id, { type: v })} placeholder="boolean" className="text-[10px] text-accent font-mono" />
+                  <InlineEdit value={sf.initialValue} onSave={(v: string) => updateComponentState(component.id, sf.id, { initialValue: v })} placeholder="false" className="text-[10px] text-text-muted" />
                   <button onClick={() => removeComponentState(component.id, sf.id)} className="text-danger/60 hover:text-danger text-[10px] cursor-pointer">×</button>
                 </div>
               ))}

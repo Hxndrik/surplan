@@ -58,13 +58,13 @@ export function DesignTokensEditor() {
                         <div className="flex-1 min-w-0">
                           <InlineEdit
                             value={color.name}
-                            onChange={(v) => updateColorToken(color.id, { name: v })}
+                            onSave={(v: string) => updateColorToken(color.id, { name: v })}
                             placeholder="name"
                             className="text-[11px] text-text-primary font-medium block"
                           />
                           <InlineEdit
                             value={color.value}
-                            onChange={(v) => updateColorToken(color.id, { value: v })}
+                            onSave={(v: string) => updateColorToken(color.id, { value: v })}
                             className="text-[10px] text-text-muted font-mono block"
                           />
                         </div>
@@ -121,27 +121,27 @@ export function DesignTokensEditor() {
                 <div className="flex-1 grid grid-cols-2 md:grid-cols-3 gap-x-3 gap-y-1">
                   <div>
                     <label className="text-[9px] text-text-muted uppercase">Name</label>
-                    <InlineEdit value={t.name} onChange={(v) => updateTypographyToken(t.id, { name: v })} className="text-[11px] text-text-secondary block" />
+                    <InlineEdit value={t.name} onSave={(v: string) => updateTypographyToken(t.id, { name: v })} className="text-[11px] text-text-secondary block" />
                   </div>
                   <div>
                     <label className="text-[9px] text-text-muted uppercase">Font Family</label>
-                    <InlineEdit value={t.fontFamily} onChange={(v) => updateTypographyToken(t.id, { fontFamily: v })} className="text-[11px] text-text-secondary block" />
+                    <InlineEdit value={t.fontFamily} onSave={(v: string) => updateTypographyToken(t.id, { fontFamily: v })} className="text-[11px] text-text-secondary block" />
                   </div>
                   <div>
                     <label className="text-[9px] text-text-muted uppercase">Size</label>
-                    <InlineEdit value={t.fontSize} onChange={(v) => updateTypographyToken(t.id, { fontSize: v })} className="text-[11px] text-accent font-mono block" />
+                    <InlineEdit value={t.fontSize} onSave={(v: string) => updateTypographyToken(t.id, { fontSize: v })} className="text-[11px] text-accent font-mono block" />
                   </div>
                   <div>
                     <label className="text-[9px] text-text-muted uppercase">Weight</label>
-                    <InlineEdit value={t.fontWeight} onChange={(v) => updateTypographyToken(t.id, { fontWeight: v })} className="text-[11px] text-text-secondary block" />
+                    <InlineEdit value={t.fontWeight} onSave={(v: string) => updateTypographyToken(t.id, { fontWeight: v })} className="text-[11px] text-text-secondary block" />
                   </div>
                   <div>
                     <label className="text-[9px] text-text-muted uppercase">Line Height</label>
-                    <InlineEdit value={t.lineHeight} onChange={(v) => updateTypographyToken(t.id, { lineHeight: v })} className="text-[11px] text-text-secondary block" />
+                    <InlineEdit value={t.lineHeight} onSave={(v: string) => updateTypographyToken(t.id, { lineHeight: v })} className="text-[11px] text-text-secondary block" />
                   </div>
                   <div>
                     <label className="text-[9px] text-text-muted uppercase">Letter Spacing</label>
-                    <InlineEdit value={t.letterSpacing} onChange={(v) => updateTypographyToken(t.id, { letterSpacing: v })} className="text-[11px] text-text-secondary block" />
+                    <InlineEdit value={t.letterSpacing} onSave={(v: string) => updateTypographyToken(t.id, { letterSpacing: v })} className="text-[11px] text-text-secondary block" />
                   </div>
                 </div>
                 <button onClick={() => removeTypographyToken(t.id)} className="text-danger/60 hover:text-danger text-xs cursor-pointer flex-shrink-0">×</button>
@@ -172,8 +172,8 @@ export function DesignTokensEditor() {
               const px = parseInt(sp.value) || 0;
               return (
                 <div key={sp.id} className="flex items-center gap-3 bg-bg-primary rounded border border-border-default px-3 py-2">
-                  <InlineEdit value={sp.name} onChange={(v) => updateSpacingToken(sp.id, { name: v })} placeholder="name" className="text-[11px] text-text-secondary w-20" />
-                  <InlineEdit value={sp.value} onChange={(v) => updateSpacingToken(sp.id, { value: v })} className="text-[11px] text-accent font-mono w-16" />
+                  <InlineEdit value={sp.name} onSave={(v: string) => updateSpacingToken(sp.id, { name: v })} placeholder="name" className="text-[11px] text-text-secondary w-20" />
+                  <InlineEdit value={sp.value} onSave={(v: string) => updateSpacingToken(sp.id, { value: v })} className="text-[11px] text-accent font-mono w-16" />
                   <div className="flex-1 h-4 bg-bg-tertiary rounded overflow-hidden">
                     <div className="h-full bg-accent/30 rounded" style={{ width: `${Math.min(px * 2, 100)}%` }} />
                   </div>

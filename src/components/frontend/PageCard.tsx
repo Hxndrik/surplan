@@ -3,7 +3,6 @@ import { useFrontendStore } from '../../store/useFrontendStore';
 import { useEntityStore } from '../../store/useEntityStore';
 import { useProjectStore } from '../../store/useProjectStore';
 import { InlineEdit } from '../shared/InlineEdit';
-import { Badge } from '../shared/Badge';
 import type { Page, PageStatus, WireframeSectionWidth } from '../../types';
 
 const STATUS_COLORS: Record<PageStatus, string> = {
@@ -57,13 +56,13 @@ export function PageCard({ page, onViewWireframe }: PageCardProps) {
           <div className="flex-1 min-w-0">
             <InlineEdit
               value={page.name}
-              onChange={(v) => updatePage(page.id, { name: v })}
+              onSave={(v: string) => updatePage(page.id, { name: v })}
               className="text-sm font-semibold text-text-primary"
             />
             <div className="flex items-center gap-1.5 mt-0.5">
               <InlineEdit
                 value={page.path}
-                onChange={(v) => updatePage(page.id, { path: v })}
+                onSave={(v: string) => updatePage(page.id, { path: v })}
                 className="text-[11px] text-accent font-mono"
               />
             </div>
@@ -112,7 +111,7 @@ export function PageCard({ page, onViewWireframe }: PageCardProps) {
 
         <InlineEdit
           value={page.description}
-          onChange={(v) => updatePage(page.id, { description: v })}
+          onSave={(v: string) => updatePage(page.id, { description: v })}
           placeholder="Add description..."
           className="text-[11px] text-text-muted mt-1 block w-full"
         />
@@ -120,7 +119,7 @@ export function PageCard({ page, onViewWireframe }: PageCardProps) {
         {/* Badges */}
         <div className="flex flex-wrap gap-1 mt-2">
           {linkedEntities.map((e) => (
-            <Badge key={e.id} color={e.color}>{e.name}</Badge>
+            <span key={e.id} className="text-[9px] px-1.5 py-0.5 rounded bg-bg-tertiary text-text-secondary" style={{ borderLeft: `2px solid ${e.color}` }}>{e.name}</span>
           ))}
           {linkedComponents.map((c) => (
             <span key={c.id} className="text-[9px] px-1.5 py-0.5 rounded bg-bg-tertiary text-text-secondary">{c.name}</span>
@@ -171,13 +170,13 @@ export function PageCard({ page, onViewWireframe }: PageCardProps) {
             <p className="text-[10px] text-text-muted uppercase tracking-wide font-medium">SEO</p>
             <InlineEdit
               value={page.metaTitle}
-              onChange={(v) => updatePage(page.id, { metaTitle: v })}
+              onSave={(v: string) => updatePage(page.id, { metaTitle: v })}
               placeholder="Meta title..."
               className="text-[11px] text-text-secondary block w-full"
             />
             <InlineEdit
               value={page.metaDescription}
-              onChange={(v) => updatePage(page.id, { metaDescription: v })}
+              onSave={(v: string) => updatePage(page.id, { metaDescription: v })}
               placeholder="Meta description..."
               className="text-[11px] text-text-muted block w-full"
             />
@@ -188,7 +187,7 @@ export function PageCard({ page, onViewWireframe }: PageCardProps) {
             <p className="text-[10px] text-text-muted uppercase tracking-wide font-medium">Roles (comma-separated)</p>
             <InlineEdit
               value={page.roles}
-              onChange={(v) => updatePage(page.id, { roles: v })}
+              onSave={(v: string) => updatePage(page.id, { roles: v })}
               placeholder="admin, editor, viewer..."
               className="text-[11px] text-text-secondary block w-full"
             />
@@ -207,7 +206,7 @@ export function PageCard({ page, onViewWireframe }: PageCardProps) {
               <div key={ws.id} className="flex items-center gap-2 bg-bg-tertiary rounded px-2 py-1.5">
                 <InlineEdit
                   value={ws.label}
-                  onChange={(v) => updateWireframeSection(page.id, ws.id, { label: v })}
+                  onSave={(v: string) => updateWireframeSection(page.id, ws.id, { label: v })}
                   className="text-[11px] text-text-secondary flex-1"
                 />
                 <select

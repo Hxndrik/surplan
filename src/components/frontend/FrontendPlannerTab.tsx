@@ -53,8 +53,6 @@ export function FrontendPlannerTab() {
   };
 
   // Stats
-  const plannedPages = pages.filter((p) => p.status === 'planned').length;
-  const builtPages = pages.filter((p) => p.status === 'built').length;
   const totalSections = pages.reduce((acc, p) => acc + p.wireframeSections.length, 0);
 
   return (

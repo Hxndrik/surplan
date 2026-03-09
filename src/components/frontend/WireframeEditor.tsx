@@ -106,7 +106,7 @@ export function WireframeEditor({ pageId, onBack }: WireframeEditorProps) {
                 <span className="text-[10px] text-text-muted w-5">{idx + 1}</span>
                 <InlineEdit
                   value={ws.label}
-                  onChange={(v) => updateWireframeSection(pageId, ws.id, { label: v })}
+                  onSave={(v: string) => updateWireframeSection(pageId, ws.id, { label: v })}
                   className="text-xs text-text-secondary flex-1"
                 />
                 <div className="flex gap-1">
