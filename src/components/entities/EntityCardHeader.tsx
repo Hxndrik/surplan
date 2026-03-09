@@ -143,7 +143,7 @@ export function EntityCardHeader({
 
   return (
     <div>
-      <div className="flex items-center justify-between px-3 py-2 border-b border-border-default bg-bg-tertiary/50 group/header">
+      <div className="flex items-center justify-between px-3 py-2 border-b border-border-default bg-bg-tertiary/50 group/header rounded-t-lg">
         <div className="flex items-center gap-2 flex-1 min-w-0">
           {/* Drag handle */}
           {dragHandle && (
