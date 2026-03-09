@@ -2,6 +2,7 @@ import { useRef, useEffect } from 'react';
 import { useUIStore } from '../../store/useUIStore';
 import { useEntityStore } from '../../store/useEntityStore';
 import { useProjectStore } from '../../store/useProjectStore';
+import { useFrontendStore } from '../../store/useFrontendStore';
 import { ProjectSwitcher } from './ProjectSwitcher';
 import { backupProject, restoreProject, exportProjectMarkdown } from '../../lib/backup';
 import { useToast } from '../../hooks/useToast';
@@ -13,6 +14,7 @@ const tabs: { id: ActiveTab; label: string; icon: string }[] = [
   { id: 'entities', label: 'Entities', icon: 'M4 7v10c0 2 1 3 3 3h10c2 0 3-1 3-3V7M4 7c0-2 1-3 3-3h10c2 0 3 1 3 3M4 7h16M9 11h6M9 15h4' },
   { id: 'features', label: 'Features', icon: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4' },
   { id: 'api', label: 'API', icon: 'M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' },
+  { id: 'frontend', label: 'Frontend', icon: 'M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z' },
 ];
 
 interface SidebarProps {
@@ -30,6 +32,8 @@ export function Sidebar({ onCommandPalette, onHelp, onSetTheme, theme }: Sidebar
   const doneCount = useProjectStore((s) => s.features.filter((f) => f.done).length);
   const activeCount = useProjectStore((s) => s.features.filter((f) => f.inProgress && !f.done).length);
   const endpointCount = useProjectStore((s) => s.endpoints.length);
+  const pageCount = useFrontendStore((s) => s.pages.length);
+  const componentCount = useFrontendStore((s) => s.components.length);
   const toast = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -107,6 +111,14 @@ export function Sidebar({ onCommandPalette, onHelp, onSetTheme, theme }: Sidebar
           <div className="flex items-center justify-between text-[11px]">
             <span className="text-text-muted">Endpoints</span>
             <span className="text-text-secondary font-medium">{endpointCount}</span>
+          </div>
+          <div className="flex items-center justify-between text-[11px]">
+            <span className="text-text-muted">Pages</span>
+            <span className="text-text-secondary font-medium">{pageCount}</span>
+          </div>
+          <div className="flex items-center justify-between text-[11px]">
+            <span className="text-text-muted">Components</span>
+            <span className="text-text-secondary font-medium">{componentCount}</span>
           </div>
         </div>
       </nav>

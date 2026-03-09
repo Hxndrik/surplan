@@ -1,7 +1,8 @@
 import { useEntityStore } from '../store/useEntityStore';
 import { useProjectStore } from '../store/useProjectStore';
+import { useFrontendStore, DEFAULT_DESIGN_TOKENS } from '../store/useFrontendStore';
 import { useHistoryStore } from '../store/useHistoryStore';
-import type { Entity, Column, Feature, Priority, Estimate, Milestone } from '../types';
+import type { Entity, Column, Feature, Priority, Estimate, Milestone, Page, UIComponent, DesignTokens } from '../types';
 import { createId } from './id';
 
 interface BackupData {
@@ -14,14 +15,18 @@ interface BackupData {
   milestones: ReturnType<typeof useProjectStore.getState>['milestones'];
   scope: ReturnType<typeof useProjectStore.getState>['scope'];
   endpoints: ReturnType<typeof useProjectStore.getState>['endpoints'];
+  pages?: Page[];
+  components?: UIComponent[];
+  designTokens?: DesignTokens;
 }
 
 export function backupProject(): void {
   const es = useEntityStore.getState();
   const ps = useProjectStore.getState();
+  const fs = useFrontendStore.getState();
 
   const data: BackupData = {
-    version: 1,
+    version: 2,
     exportedAt: new Date().toISOString(),
     projectName: ps.meta.name || 'Untitled Project',
     entities: es.entities,
@@ -30,6 +35,9 @@ export function backupProject(): void {
     milestones: ps.milestones,
     scope: ps.scope,
     endpoints: ps.endpoints,
+    pages: fs.pages,
+    components: fs.components,
+    designTokens: fs.designTokens,
   };
 
   const json = JSON.stringify(data, null, 2);
@@ -63,6 +71,11 @@ export function restoreProject(file: File): Promise<{ success: boolean; message:
           milestones: data.milestones ?? [],
           scope: data.scope ?? [],
           endpoints: data.endpoints ?? [],
+        });
+        useFrontendStore.setState({
+          pages: data.pages ?? [],
+          components: data.components ?? [],
+          designTokens: data.designTokens ?? DEFAULT_DESIGN_TOKENS,
         });
 
         Promise.resolve().then(() =>

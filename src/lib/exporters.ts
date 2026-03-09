@@ -1,4 +1,4 @@
-import type { Entity, Column, ExportFormat } from '../types';
+import type { Entity, Column, ExportFormat, FrontendExportFormat, Page, UIComponent, DesignTokens } from '../types';
 
 // ─── SQL Type Mapping ─────────────────────────────────────────────────────────
 
@@ -1604,5 +1604,247 @@ function exportMikroOrm(entities: Entity[]): string {
     lines.push('');
   });
 
+  return lines.join('\n').trimEnd();
+}
+
+// ─── Frontend Exports ──────────────────────────────────────────────────────
+
+export function exportFrontend(format: FrontendExportFormat, pages: Page[], components: UIComponent[], tokens: DesignTokens, entities: Entity[]): string {
+  switch (format) {
+    case 'react': return exportReactComponents(components, entities);
+    case 'nextjs': return exportNextPages(pages, components);
+    case 'css-tokens': return exportCssTokens(tokens);
+    case 'tailwind-config': return exportTailwindConfig(tokens);
+    case 'component-docs': return exportComponentDocs(components, pages);
+    case 'mermaid-sitemap': return exportMermaidSitemap(pages);
+    default: return '';
+  }
+}
+
+function exportReactComponents(components: UIComponent[], _entities: Entity[]): string {
+  const lines: string[] = [];
+  lines.push('// Auto-generated React component stubs from surplan');
+  lines.push('');
+
+  for (const comp of components) {
+    if (comp.props.length > 0) {
+      lines.push(`interface ${comp.name}Props {`);
+      for (const p of comp.props) {
+        const opt = p.required ? '' : '?';
+        lines.push(`  ${p.name}${opt}: ${p.type || 'unknown'};${p.description ? ` // ${p.description}` : ''}`);
+      }
+      lines.push('}');
+      lines.push('');
+    }
+
+    const propsParam = comp.props.length > 0 ? `{ ${comp.props.map((p) => p.name).join(', ')} }: ${comp.name}Props` : '';
+    lines.push(`export function ${comp.name}(${propsParam}) {`);
+
+    for (const sf of comp.stateFields) {
+      const init = sf.initialValue || (sf.type === 'boolean' ? 'false' : sf.type === 'number' ? '0' : "''");
+      lines.push(`  const [${sf.name}, set${sf.name.charAt(0).toUpperCase() + sf.name.slice(1)}] = useState<${sf.type || 'unknown'}>(${init});`);
+    }
+    if (comp.stateFields.length > 0) lines.push('');
+
+    for (const ev of comp.events) {
+      const payload = ev.payload && ev.payload !== 'void' ? `_payload: ${ev.payload}` : '';
+      lines.push(`  const ${ev.name} = (${payload}) => {`);
+      lines.push(`    // TODO: implement ${ev.name}`);
+      lines.push('  };');
+      lines.push('');
+    }
+
+    lines.push('  return (');
+    lines.push(`    <div className="${comp.kind}">`);
+    lines.push(`      {/* TODO: implement ${comp.name} */}`);
+    if (comp.children.length > 0) {
+      for (const cid of comp.children) {
+        const child = components.find((c) => c.id === cid);
+        if (child) lines.push(`      <${child.name} />`);
+      }
+    }
+    lines.push('    </div>');
+    lines.push('  );');
+    lines.push('}');
+    lines.push('');
+  }
+
+  if (components.some((c) => c.stateFields.length > 0)) {
+    lines.unshift("import { useState } from 'react';");
+    lines.splice(1, 0, '');
+  }
+
+  return lines.join('\n').trimEnd() || '// No components defined yet';
+}
+
+function exportNextPages(pages: Page[], components: UIComponent[]): string {
+  const lines: string[] = [];
+  lines.push('// Auto-generated Next.js App Router pages from surplan');
+  lines.push('');
+
+  for (const page of pages) {
+    const appPath = page.path.replace(/^\//, '').replace(/:(\w+)/g, '[$1]').replace(/\/$/, '') || '(root)';
+    lines.push(`// ═══ app/${appPath}/page.tsx ═══`);
+    lines.push('');
+
+    const params = (page.path.match(/:(\w+)/g) || []).map((p) => p.slice(1));
+    if (params.length > 0) {
+      lines.push(`interface PageProps { params: { ${params.map((p) => `${p}: string`).join('; ')} } }`);
+      lines.push('');
+    }
+
+    const propsParam = params.length > 0 ? `{ params }: PageProps` : '';
+    const isAsync = page.dataBindings.length > 0;
+    lines.push(`export default ${isAsync ? 'async ' : ''}function ${page.name.replace(/[^a-zA-Z0-9]/g, '')}Page(${propsParam}) {`);
+
+    if (isAsync) {
+      for (const db of page.dataBindings) lines.push(`  // TODO: fetch — ${db.description || db.endpointId}`);
+      lines.push('');
+    }
+
+    lines.push('  return (');
+    lines.push(`    <div className="layout-${page.layout}">`);
+
+    if (page.wireframeSections.length > 0) {
+      for (const ws of [...page.wireframeSections].sort((a, b) => a.order - b.order)) {
+        const comp = components.find((c) => c.id === ws.componentRef);
+        lines.push(comp ? `      <${comp.name} /> {/* ${ws.label} */}` : `      <section>{/* ${ws.label} (${ws.width}) */}</section>`);
+      }
+    } else {
+      const pageComps = components.filter((c) => page.componentRefs.includes(c.id));
+      for (const c of pageComps) lines.push(`      <${c.name} />`);
+      if (pageComps.length === 0) lines.push(`      {/* TODO: ${page.name} */}`);
+    }
+
+    lines.push('    </div>');
+    lines.push('  );');
+    lines.push('}');
+
+    if (page.metaTitle || page.metaDescription) {
+      lines.push('');
+      lines.push(`export const metadata = {${page.metaTitle ? ` title: '${page.metaTitle.replace(/'/g, "\\'")}',` : ''}${page.metaDescription ? ` description: '${page.metaDescription.replace(/'/g, "\\'")}',` : ''} };`);
+    }
+    lines.push('');
+  }
+
+  return lines.join('\n').trimEnd() || '// No pages defined yet';
+}
+
+function exportCssTokens(tokens: DesignTokens): string {
+  const lines: string[] = [];
+  lines.push('/* Auto-generated CSS custom properties from surplan */');
+  lines.push(':root {');
+  if (tokens.colors.length > 0) {
+    lines.push('  /* Colors */');
+    for (const c of tokens.colors) if (c.name) lines.push(`  --color-${c.name}: ${c.value};`);
+  }
+  if (tokens.typography.length > 0) {
+    lines.push('  /* Typography */');
+    for (const t of tokens.typography) {
+      if (!t.name) continue;
+      lines.push(`  --font-size-${t.name}: ${t.fontSize};`);
+      lines.push(`  --font-weight-${t.name}: ${t.fontWeight};`);
+      lines.push(`  --line-height-${t.name}: ${t.lineHeight};`);
+    }
+  }
+  if (tokens.spacing.length > 0) {
+    lines.push('  /* Spacing */');
+    for (const s of tokens.spacing) if (s.name) lines.push(`  --spacing-${s.name}: ${s.value};`);
+  }
+  if (tokens.breakpoints.length > 0) {
+    lines.push('  /* Breakpoints */');
+    for (const b of tokens.breakpoints) if (b.name) lines.push(`  --breakpoint-${b.name}: ${b.value};`);
+  }
+  lines.push('}');
+  return lines.join('\n').trimEnd();
+}
+
+function exportTailwindConfig(tokens: DesignTokens): string {
+  const lines: string[] = [];
+  lines.push('// Auto-generated Tailwind config from surplan design tokens');
+  lines.push('export default {');
+  lines.push('  theme: {');
+  lines.push('    extend: {');
+  if (tokens.colors.length > 0) {
+    lines.push('      colors: {');
+    for (const c of tokens.colors) if (c.name) lines.push(`        '${c.name}': '${c.value}',`);
+    lines.push('      },');
+  }
+  if (tokens.typography.length > 0) {
+    lines.push('      fontSize: {');
+    for (const t of tokens.typography) if (t.name) lines.push(`        '${t.name}': ['${t.fontSize}', { lineHeight: '${t.lineHeight}', letterSpacing: '${t.letterSpacing}', fontWeight: '${t.fontWeight}' }],`);
+    lines.push('      },');
+  }
+  if (tokens.spacing.length > 0) {
+    lines.push('      spacing: {');
+    for (const s of tokens.spacing) if (s.name) lines.push(`        '${s.name}': '${s.value}',`);
+    lines.push('      },');
+  }
+  if (tokens.breakpoints.length > 0) {
+    lines.push('      screens: {');
+    for (const b of tokens.breakpoints) if (b.name) lines.push(`        '${b.name}': '${b.value}',`);
+    lines.push('      },');
+  }
+  lines.push('    },');
+  lines.push('  },');
+  lines.push('};');
+  return lines.join('\n').trimEnd();
+}
+
+function exportComponentDocs(components: UIComponent[], pages: Page[]): string {
+  const lines: string[] = [];
+  lines.push('# Frontend Architecture');
+  lines.push('');
+  lines.push(`> ${pages.length} pages · ${components.length} components`);
+  lines.push('');
+  if (pages.length > 0) {
+    lines.push('## Pages');
+    lines.push('');
+    lines.push('| Page | Path | Layout | Auth | Status |');
+    lines.push('|------|------|--------|------|--------|');
+    for (const p of pages) lines.push(`| ${p.name} | \`${p.path}\` | ${p.layout} | ${p.authRequired ? 'Yes' : 'No'} | ${p.status} |`);
+    lines.push('');
+  }
+  if (components.length > 0) {
+    lines.push('## Components');
+    lines.push('');
+    for (const c of components) {
+      lines.push(`### \`<${c.name} />\` (${c.kind})`);
+      if (c.description) lines.push(`\n${c.description}`);
+      lines.push('');
+      if (c.props.length > 0) {
+        lines.push('| Prop | Type | Required | Default |');
+        lines.push('|------|------|----------|---------|');
+        for (const p of c.props) lines.push(`| \`${p.name}\` | \`${p.type}\` | ${p.required ? 'Yes' : 'No'} | ${p.defaultValue || '—'} |`);
+        lines.push('');
+      }
+      if (c.events.length > 0) {
+        for (const ev of c.events) lines.push(`- **Event:** \`${ev.name}(${ev.payload})\`${ev.description ? ` — ${ev.description}` : ''}`);
+        lines.push('');
+      }
+      if (c.stateFields.length > 0) {
+        for (const sf of c.stateFields) lines.push(`- **State:** \`${sf.name}: ${sf.type}\` = \`${sf.initialValue || '—'}\``);
+        lines.push('');
+      }
+    }
+  }
+  return lines.join('\n').trimEnd() || '# Frontend Architecture\n\nNo pages or components defined.';
+}
+
+function exportMermaidSitemap(pages: Page[]): string {
+  if (pages.length === 0) return 'graph TD\n  empty["No pages defined"]';
+  const lines: string[] = ['graph TD'];
+  const idMap: Record<string, string> = {};
+  pages.forEach((p, i) => {
+    const sid = `P${i}`;
+    idMap[p.id] = sid;
+    const label = `${p.name}`;
+    lines.push(p.authRequired ? `  ${sid}[["${label}<br/>${p.path}"]]` : `  ${sid}["${label}<br/>${p.path}"]`);
+  });
+  for (const page of pages) {
+    for (const tid of page.navigatesTo) {
+      if (idMap[page.id] && idMap[tid]) lines.push(`  ${idMap[page.id]} --> ${idMap[tid]}`);
+    }
+  }
   return lines.join('\n').trimEnd();
 }

@@ -3,6 +3,7 @@ import { ProjectOverview } from '../project/ProjectOverview';
 import { EntityGrid } from '../entities/EntityGrid';
 import { FeatureList } from '../project/FeatureList';
 import { ApiEndpointsTab } from '../api/ApiEndpointsTab';
+import { FrontendPlannerTab } from '../frontend/FrontendPlannerTab';
 
 interface MainContentProps {
   onExport?: () => void;
@@ -17,6 +18,7 @@ export function MainContent({ onExport }: MainContentProps) {
       {activeTab === 'entities' && <EntityGrid onExport={onExport} />}
       {activeTab === 'features' && <FeatureList />}
       {activeTab === 'api' && <ApiEndpointsTab />}
+      {activeTab === 'frontend' && <FrontendPlannerTab />}
     </main>
   );
 }

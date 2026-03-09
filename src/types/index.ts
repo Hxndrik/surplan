@@ -139,7 +139,138 @@ export interface ProjectMeta {
   notes: string; // freeform changelog / dev notes
 }
 
-export type ActiveTab = 'overview' | 'entities' | 'features' | 'api';
+export type ActiveTab = 'overview' | 'entities' | 'features' | 'api' | 'frontend';
 export type EntityView = 'grid' | 'erd';
 export type ExportFormat = 'sql-postgres' | 'sql-mysql' | 'sql-sqlite' | 'typescript' | 'zod' | 'prisma' | 'drizzle' | 'typeorm' | 'mermaid' | 'json' | 'dbml' | 'graphql' | 'sequelize' | 'mongoose' | 'sqlalchemy' | 'jsonschema' | 'knex' | 'mikro-orm';
+export type FrontendExportFormat = 'react' | 'nextjs' | 'css-tokens' | 'tailwind-config' | 'component-docs' | 'mermaid-sitemap';
 export type CopyFormat = 'sql' | 'markdown' | 'insert' | 'zod' | 'drizzle' | 'typeorm';
+
+// ── Frontend Planner types ─────────────────────────────────────────
+
+export type PageId = string;
+export type ComponentId = string;
+export type DesignTokenId = string;
+
+export type PageStatus = 'planned' | 'in-progress' | 'built';
+
+export interface PageDataBinding {
+  endpointId: string;
+  description: string;
+}
+
+export type WireframeSectionWidth = 'full' | '1/2' | '1/3' | '2/3' | '1/4' | '3/4';
+
+export interface WireframeSection {
+  id: string;
+  label: string;
+  componentRef: ComponentId | null;
+  order: number;
+  width: WireframeSectionWidth;
+  notes: string;
+}
+
+export interface Page {
+  id: PageId;
+  name: string;
+  path: string;
+  description: string;
+  layout: string;
+  authRequired: boolean;
+  roles: string;
+  metaTitle: string;
+  metaDescription: string;
+  componentRefs: ComponentId[];
+  entityRefs: EntityId[];
+  dataBindings: PageDataBinding[];
+  wireframeSections: WireframeSection[];
+  navigatesTo: PageId[];
+  featureRef: FeatureId | null;
+  status: PageStatus;
+  notes: string;
+  tags: string[];
+  order: number;
+  createdAt: number;
+  updatedAt: number;
+}
+
+export type ComponentKind = 'page' | 'layout' | 'container' | 'ui' | 'form' | 'data-display' | 'navigation' | 'feedback' | 'utility';
+
+export interface ComponentProp {
+  id: string;
+  name: string;
+  type: string;
+  required: boolean;
+  defaultValue: string;
+  description: string;
+}
+
+export interface ComponentEvent {
+  id: string;
+  name: string;
+  payload: string;
+  description: string;
+}
+
+export interface ComponentStateField {
+  id: string;
+  name: string;
+  type: string;
+  initialValue: string;
+  description: string;
+}
+
+export interface UIComponent {
+  id: ComponentId;
+  name: string;
+  description: string;
+  kind: ComponentKind;
+  props: ComponentProp[];
+  events: ComponentEvent[];
+  stateFields: ComponentStateField[];
+  entityRef: EntityId | null;
+  endpointRefs: string[];
+  children: ComponentId[];
+  parentId: ComponentId | null;
+  tags: string[];
+  notes: string;
+  status: PageStatus;
+  order: number;
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface ColorToken {
+  id: string;
+  name: string;
+  value: string;
+  category: string;
+}
+
+export interface TypographyToken {
+  id: string;
+  name: string;
+  fontFamily: string;
+  fontSize: string;
+  fontWeight: string;
+  lineHeight: string;
+  letterSpacing: string;
+}
+
+export interface SpacingToken {
+  id: string;
+  name: string;
+  value: string;
+}
+
+export interface BreakpointToken {
+  name: string;
+  value: string;
+}
+
+export interface DesignTokens {
+  colors: ColorToken[];
+  typography: TypographyToken[];
+  spacing: SpacingToken[];
+  breakpoints: BreakpointToken[];
+  notes: string;
+}

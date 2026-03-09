@@ -3,8 +3,9 @@ import { persist } from 'zustand/middleware';
 import { createId } from '../lib/id';
 import { useEntityStore } from './useEntityStore';
 import { useProjectStore } from './useProjectStore';
+import { useFrontendStore, DEFAULT_DESIGN_TOKENS } from './useFrontendStore';
 import { useHistoryStore } from './useHistoryStore';
-import type { Entity, Feature, ScopeItem, ApiEndpoint, ProjectMeta, Milestone } from '../types';
+import type { Entity, Feature, ScopeItem, ApiEndpoint, ProjectMeta, Milestone, Page, UIComponent, DesignTokens } from '../types';
 
 export interface ProjectEntry {
   id: string;
@@ -19,6 +20,9 @@ interface ProjectSnapshot {
   milestones: Milestone[];
   scope: ScopeItem[];
   endpoints: ApiEndpoint[];
+  pages?: Page[];
+  components?: UIComponent[];
+  designTokens?: DesignTokens;
 }
 
 interface ProjectsStore {
@@ -33,6 +37,7 @@ interface ProjectsStore {
 function captureSnapshot(): ProjectSnapshot {
   const es = useEntityStore.getState();
   const ps = useProjectStore.getState();
+  const fs = useFrontendStore.getState();
   return {
     entities: es.entities,
     meta: ps.meta,
@@ -40,6 +45,9 @@ function captureSnapshot(): ProjectSnapshot {
     milestones: ps.milestones,
     scope: ps.scope,
     endpoints: ps.endpoints,
+    pages: fs.pages,
+    components: fs.components,
+    designTokens: fs.designTokens,
   };
 }
 
@@ -51,6 +59,9 @@ function applySnapshot(snap: ProjectSnapshot | null) {
     milestones: [],
     scope: [],
     endpoints: [],
+    pages: [],
+    components: [],
+    designTokens: DEFAULT_DESIGN_TOKENS,
   };
   useEntityStore.setState({ entities: data.entities });
   useProjectStore.setState({
@@ -59,6 +70,11 @@ function applySnapshot(snap: ProjectSnapshot | null) {
     milestones: data.milestones ?? [],
     scope: data.scope,
     endpoints: data.endpoints,
+  });
+  useFrontendStore.setState({
+    pages: data.pages ?? [],
+    components: data.components ?? [],
+    designTokens: data.designTokens ?? DEFAULT_DESIGN_TOKENS,
   });
 }
 

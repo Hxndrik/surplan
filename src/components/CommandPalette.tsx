@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { useEntityStore } from '../store/useEntityStore';
 import { useProjectStore } from '../store/useProjectStore';
 import { useUIStore } from '../store/useUIStore';
+import { useFrontendStore } from '../store/useFrontendStore';
 import { useToast } from '../hooks/useToast';
 import { ENTITY_TEMPLATES } from '../lib/templates';
 import { backupProject, exportProjectMarkdown, exportOpenApi, exportFeaturesCSV, exportHtmlDocs, exportGithubIssues, exportChangelog, generateMultiAgentPrompt } from '../lib/backup';
@@ -32,6 +33,8 @@ export function CommandPalette({ onClose }: CommandPaletteProps) {
   const entities = useEntityStore((s) => s.entities);
   const setAllCollapsed = useEntityStore((s) => s.setAllCollapsed);
   const setActiveTab = useUIStore((s) => s.setActiveTab);
+  const addPage = useFrontendStore((s) => s.addPage);
+  const addComponent = useFrontendStore((s) => s.addComponent);
   const addFeature = useProjectStore((s) => s.addFeature);
   const addEndpoint = useProjectStore((s) => s.addEndpoint);
   const updateEndpoint = useProjectStore((s) => s.updateEndpoint);
@@ -63,6 +66,54 @@ export function CommandPalette({ onClose }: CommandPaletteProps) {
       id: 'nav-api', label: 'Go to API Endpoints', icon: '🔌',
       category: 'Navigate', keywords: ['api', 'endpoints', 'rest'],
       action: () => { setActiveTab('api' as ActiveTab); onClose(); },
+    },
+    {
+      id: 'nav-frontend', label: 'Go to Frontend', icon: '🎨',
+      category: 'Navigate', keywords: ['frontend', 'pages', 'components', 'ui', 'design'],
+      action: () => { setActiveTab('frontend'); onClose(); },
+    },
+    // Frontend actions
+    {
+      id: 'new-page', label: 'New Page', description: 'Create a new frontend page',
+      icon: '➕', category: 'Frontend',
+      keywords: ['page', 'frontend', 'route', 'view'],
+      action: () => {
+        setActiveTab('frontend');
+        addPage('New page');
+        toast.success('Page created');
+        onClose();
+      },
+    },
+    {
+      id: 'new-component', label: 'New Component', description: 'Create a new UI component',
+      icon: '➕', category: 'Frontend',
+      keywords: ['component', 'frontend', 'ui', 'widget'],
+      action: () => {
+        setActiveTab('frontend');
+        addComponent('NewComponent');
+        toast.success('Component created');
+        onClose();
+      },
+    },
+    {
+      id: 'view-sitemap', label: 'View Sitemap', description: 'Switch to sitemap view',
+      icon: '🗺', category: 'Frontend',
+      keywords: ['sitemap', 'map', 'navigation', 'structure', 'frontend'],
+      action: () => {
+        setActiveTab('frontend');
+        onClose();
+        window.dispatchEvent(new CustomEvent('surplan:frontend-view', { detail: 'sitemap' }));
+      },
+    },
+    {
+      id: 'view-tokens', label: 'View Design Tokens', description: 'Switch to design tokens view',
+      icon: '🎨', category: 'Frontend',
+      keywords: ['tokens', 'design', 'colors', 'typography', 'spacing', 'frontend'],
+      action: () => {
+        setActiveTab('frontend');
+        onClose();
+        window.dispatchEvent(new CustomEvent('surplan:frontend-view', { detail: 'tokens' }));
+      },
     },
     // Entity actions
     {
@@ -853,7 +904,7 @@ export function CommandPalette({ onClose }: CommandPaletteProps) {
         onClose();
       },
     })),
-  ], [addEndpoint, addEntity, addEntityFromTemplate, addFeature, entities, features, setActiveTab, setAllCollapsed, toast, onClose]);
+  ], [addComponent, addEndpoint, addEntity, addEntityFromTemplate, addFeature, addPage, entities, features, setActiveTab, setAllCollapsed, toast, onClose]);
 
   // Column search results — shown when query is 2+ chars
   const columnResults = useMemo<Command[]>(() => {

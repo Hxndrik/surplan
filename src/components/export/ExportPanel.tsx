@@ -1,10 +1,13 @@
 import { useState } from 'react';
 import { useEntityStore } from '../../store/useEntityStore';
-import { exportEntities } from '../../lib/exporters';
+import { useFrontendStore } from '../../store/useFrontendStore';
+import { exportEntities, exportFrontend } from '../../lib/exporters';
 import { useToast } from '../../hooks/useToast';
-import type { ExportFormat } from '../../types';
+import type { ExportFormat, FrontendExportFormat } from '../../types';
 
-const FORMATS: { id: ExportFormat; label: string; ext: string; icon: string; description: string; color: string }[] = [
+type AnyFormat = ExportFormat | FrontendExportFormat;
+
+const FORMATS: { id: AnyFormat; label: string; ext: string; icon: string; description: string; color: string; category?: string }[] = [
   { id: 'sql-postgres', label: 'PostgreSQL', ext: 'sql', icon: '🐘', description: 'CREATE TABLE with constraints', color: 'text-blue-400' },
   { id: 'sql-mysql', label: 'MySQL', ext: 'sql', icon: '🐬', description: 'MySQL compatible DDL', color: 'text-orange-400' },
   { id: 'sql-sqlite', label: 'SQLite', ext: 'sql', icon: '🪨', description: 'Lightweight SQLite schema', color: 'text-yellow-400' },
@@ -23,7 +26,16 @@ const FORMATS: { id: ExportFormat; label: string; ext: string; icon: string; des
   { id: 'jsonschema', label: 'JSON Schema', ext: 'json', icon: '{}', description: 'JSON Schema draft-07 definitions', color: 'text-cyan-400' },
   { id: 'knex', label: 'Knex.js', ext: 'js', icon: '🔧', description: 'Knex migration (up/down)', color: 'text-orange-300' },
   { id: 'mikro-orm', label: 'MikroORM', ext: 'ts', icon: '🧬', description: 'MikroORM entity decorators', color: 'text-violet-400' },
+  // Frontend exports
+  { id: 'react', label: 'React', ext: 'tsx', icon: '⚛', description: 'React component stubs', color: 'text-cyan-300', category: 'frontend' },
+  { id: 'nextjs', label: 'Next.js', ext: 'tsx', icon: '▲', description: 'Next.js App Router pages', color: 'text-text-primary', category: 'frontend' },
+  { id: 'css-tokens', label: 'CSS Tokens', ext: 'css', icon: '🎨', description: 'CSS custom properties', color: 'text-blue-300', category: 'frontend' },
+  { id: 'tailwind-config', label: 'Tailwind', ext: 'ts', icon: '🌊', description: 'Tailwind config tokens', color: 'text-cyan-400', category: 'frontend' },
+  { id: 'component-docs', label: 'Component Docs', ext: 'md', icon: '📖', description: 'Markdown component docs', color: 'text-green-300', category: 'frontend' },
+  { id: 'mermaid-sitemap', label: 'Sitemap', ext: 'md', icon: '🗺', description: 'Mermaid sitemap diagram', color: 'text-purple-300', category: 'frontend' },
 ];
+
+const FRONTEND_FORMATS: FrontendExportFormat[] = ['react', 'nextjs', 'css-tokens', 'tailwind-config', 'component-docs', 'mermaid-sitemap'];
 
 interface ExportPanelProps {
   initialFormat?: ExportFormat | null;
@@ -31,12 +43,16 @@ interface ExportPanelProps {
 }
 
 export function ExportPanel({ initialFormat, onClose }: ExportPanelProps) {
-  const [selectedFormat, setSelectedFormat] = useState<ExportFormat>(initialFormat ?? 'sql-postgres');
+  const [selectedFormat, setSelectedFormat] = useState<AnyFormat>(initialFormat ?? 'sql-postgres');
   const [copied, setCopied] = useState(false);
   const entities = useEntityStore((s) => s.entities);
+  const { pages, components: feComponents, designTokens } = useFrontendStore();
   const toast = useToast();
 
-  const output = exportEntities(entities, selectedFormat);
+  const isFrontendFormat = FRONTEND_FORMATS.includes(selectedFormat as FrontendExportFormat);
+  const output = isFrontendFormat
+    ? exportFrontend(selectedFormat as FrontendExportFormat, pages, feComponents, designTokens, entities)
+    : exportEntities(entities, selectedFormat as ExportFormat);
   const fmt = FORMATS.find((f) => f.id === selectedFormat)!;
 
   const handleCopy = async () => {

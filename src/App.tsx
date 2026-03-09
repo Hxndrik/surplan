@@ -14,6 +14,7 @@ import { ProjectStarterModal } from './components/project/ProjectStarterModal';
 import { useUIStore } from './store/useUIStore';
 import { useEntityStore } from './store/useEntityStore';
 import { useProjectStore } from './store/useProjectStore';
+import { useFrontendStore } from './store/useFrontendStore';
 import { useHistoryStore } from './store/useHistoryStore';
 import { useHistoryManager } from './hooks/useHistoryManager';
 import { Landing } from './pages/Landing';
@@ -32,6 +33,7 @@ function PlannerApp() {
   const addEntity = useEntityStore((s) => s.addEntity);
   const addFeature = useProjectStore((s) => s.addFeature);
   const addEndpoint = useProjectStore((s) => s.addEndpoint);
+  const addPage = useFrontendStore((s) => s.addPage);
   const projectName = useProjectStore((s) => s.meta.name);
   const features = useProjectStore((s) => s.features);
 
@@ -129,8 +131,9 @@ function PlannerApp() {
         if (e.key === '2') { e.preventDefault(); setActiveTab('entities'); }
         if (e.key === '3') { e.preventDefault(); setActiveTab('features'); }
         if (e.key === '4') { e.preventDefault(); setActiveTab('api'); }
+        if (e.key === '5') { e.preventDefault(); setActiveTab('frontend'); }
 
-        // Ctrl+N — new entity / feature / endpoint depending on active tab
+        // Ctrl+N — new entity / feature / endpoint / page depending on active tab
         if (e.key === 'n') {
           e.preventDefault();
           if (activeTab === 'entities') {
@@ -139,6 +142,8 @@ function PlannerApp() {
             addFeature('New feature');
           } else if (activeTab === 'api') {
             addEndpoint();
+          } else if (activeTab === 'frontend') {
+            addPage('New Page');
           }
           return;
         }
@@ -178,7 +183,7 @@ function PlannerApp() {
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [activeTab, setActiveTab, undo, redo, addEntity, addFeature, addEndpoint, openExport, setShowFindReplace, theme, setTheme]);
+  }, [activeTab, setActiveTab, undo, redo, addEntity, addFeature, addEndpoint, addPage, openExport, setShowFindReplace, theme, setTheme]);
 
   // Listen for export events from command palette
   useEffect(() => {

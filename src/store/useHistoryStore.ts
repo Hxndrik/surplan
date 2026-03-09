@@ -1,7 +1,8 @@
 import { create } from 'zustand';
 import { useEntityStore } from './useEntityStore';
 import { useProjectStore } from './useProjectStore';
-import type { Entity, Feature, ScopeItem, ApiEndpoint, ProjectMeta, Milestone } from '../types';
+import { useFrontendStore, DEFAULT_DESIGN_TOKENS } from './useFrontendStore';
+import type { Entity, Feature, ScopeItem, ApiEndpoint, ProjectMeta, Milestone, Page, UIComponent, DesignTokens } from '../types';
 
 const MAX_HISTORY = 50;
 
@@ -12,6 +13,9 @@ export interface HistorySnapshot {
   milestones: Milestone[];
   scope: ScopeItem[];
   endpoints: ApiEndpoint[];
+  pages: Page[];
+  components: UIComponent[];
+  designTokens: DesignTokens;
 }
 
 interface HistoryStore {
@@ -26,6 +30,7 @@ interface HistoryStore {
 export function captureHistorySnapshot(): HistorySnapshot {
   const es = useEntityStore.getState();
   const ps = useProjectStore.getState();
+  const fs = useFrontendStore.getState();
   return {
     entities: es.entities,
     meta: ps.meta,
@@ -33,6 +38,9 @@ export function captureHistorySnapshot(): HistorySnapshot {
     milestones: ps.milestones,
     scope: ps.scope,
     endpoints: ps.endpoints,
+    pages: fs.pages,
+    components: fs.components,
+    designTokens: fs.designTokens,
   };
 }
 
@@ -44,6 +52,11 @@ function applyHistorySnapshot(snap: HistorySnapshot) {
     milestones: snap.milestones ?? [],
     scope: snap.scope,
     endpoints: snap.endpoints,
+  });
+  useFrontendStore.setState({
+    pages: snap.pages ?? [],
+    components: snap.components ?? [],
+    designTokens: snap.designTokens ?? DEFAULT_DESIGN_TOKENS,
   });
 }
 

@@ -22,6 +22,7 @@ const SECTIONS = [
       { keys: [Mod, '2'], label: 'Go to Entities' },
       { keys: [Mod, '3'], label: 'Go to Features' },
       { keys: [Mod, '4'], label: 'Go to API Endpoints' },
+      { keys: [Mod, '5'], label: 'Go to Frontend' },
     ],
   },
   {

@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useProjectStore, MILESTONE_COLORS } from '../../store/useProjectStore';
 import { useEntityStore } from '../../store/useEntityStore';
 import { useUIStore } from '../../store/useUIStore';
+import { useFrontendStore } from '../../store/useFrontendStore';
 import { ScopeSection } from './ScopeSection';
 import { InlineEdit } from '../shared/InlineEdit';
 import { backupProject, exportProjectMarkdown, exportOpenApi, exportHtmlDocs, exportGithubIssues, exportChangelog } from '../../lib/backup';
@@ -52,6 +53,8 @@ export function ProjectOverview() {
   const endpoints = useProjectStore((s) => s.endpoints);
   const scope = useProjectStore((s) => s.scope);
   const entities = useEntityStore((s) => s.entities);
+  const pages = useFrontendStore((s) => s.pages);
+  const components = useFrontendStore((s) => s.components);
   const setActiveTab = useUIStore((s) => s.setActiveTab);
 
   const doneFeatures = features.filter((f) => f.done).length;
@@ -458,7 +461,7 @@ export function ProjectOverview() {
   return (
     <div className="max-w-3xl space-y-6">
       {/* Stats grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         <StatCard
           label="Entities"
           value={entities.length}
@@ -479,6 +482,20 @@ export function ProjectOverview() {
           sub={methodCountSub}
           color="#f59e0b"
           onClick={() => setActiveTab('api')}
+        />
+        <StatCard
+          label="Pages"
+          value={pages.length}
+          sub={pages.length > 0 ? `${pages.length} page${pages.length !== 1 ? 's' : ''} defined` : 'none yet'}
+          color="#ec4899"
+          onClick={() => setActiveTab('frontend')}
+        />
+        <StatCard
+          label="Components"
+          value={components.length}
+          sub={components.length > 0 ? `${components.length} component${components.length !== 1 ? 's' : ''} defined` : 'none yet'}
+          color="#14b8a6"
+          onClick={() => setActiveTab('frontend')}
         />
         <StatCard
           label="Milestones"
