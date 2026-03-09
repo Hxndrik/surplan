@@ -2,12 +2,73 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Title & Description -->
+    <title>surplan — Free Developer Planning Tool | Schema Designer, API Planner & Feature Tracker</title>
+    <meta name="description" content="Free, local-only planning tool for developers. Design database schemas, plan REST APIs, track features with milestones, and export to 18+ formats — all in your browser." />
+    <meta name="keywords" content="developer planning tool, database schema designer, API planner, ERD generator, feature tracker, Prisma export, SQL DDL, Drizzle ORM, TypeORM, Zod schema, GraphQL schema, OpenAPI, local-first, free" />
+    <meta name="author" content="Hendrik" />
+    <meta name="robots" content="index, follow" />
+
+    <!-- Canonical -->
+    <link rel="canonical" href="https://surplan.xyz/" />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <!-- Theme Color -->
+    <meta name="theme-color" content="#0a0a0b" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="surplan" />
+    <meta property="og:title" content="surplan — Free Developer Planning Tool" />
+    <meta property="og:description" content="Design database schemas, plan REST APIs, track features, and export to 18+ formats. Local-only, no signup, free forever." />
+    <meta property="og:url" content="https://surplan.xyz/" />
+    <meta property="og:image" content="https://surplan.xyz/og-image.svg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="surplan — local-only developer planning tool showing entity designer with schema columns and export formats" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="surplan — Free Developer Planning Tool" />
+    <meta name="twitter:description" content="Design database schemas, plan REST APIs, track features, and export to 18+ formats. Free, local-only, no signup." />
+    <meta name="twitter:image" content="https://surplan.xyz/og-image.svg" />
+
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "surplan",
+      "url": "https://surplan.xyz",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "Web",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "description": "Free, local-only planning tool for developers. Design database schemas, plan REST APIs, track features with milestones, and export to 18+ formats.",
+      "screenshot": "https://surplan.xyz/og-image.svg",
+      "softwareVersion": "1.0.0",
+      "author": {
+        "@type": "Person",
+        "name": "Hendrik"
+      },
+      "featureList": "Database schema designer, ERD visualization, REST API planner, Feature tracker, 18+ export formats including SQL, Prisma, Drizzle, TypeORM, Zod, GraphQL, OpenAPI"
+    }
+    </script>
+
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300..700;1,14..32,300..700&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet" />
-    <title>surplan</title>
+
     <!-- Prevent flash of wrong theme -->
     <script>
       (function () {

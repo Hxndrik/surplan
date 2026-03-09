@@ -597,7 +597,6 @@ export function FeatureList() {
     });
   };
   const copyFilteredAsMd = () => {
-    const milestoneMap = new Map(milestones.map((m) => [m.id, m.name]));
     const lines: string[] = [];
     groups.forEach((g) => {
       if (g.features.length === 0) return;
@@ -1903,7 +1902,7 @@ export function FeatureList() {
         function BoardDroppable({ id, children, color }: { id: string; children: React.ReactNode; color: string }) {
           const { setNodeRef, isOver } = useDroppable({ id });
           return (
-            <div ref={setNodeRef} className={`space-y-2 min-h-[48px] rounded-lg transition-colors ${isOver ? 'ring-1 ring-inset' : ''}`} style={isOver ? { ringColor: color } : undefined}>
+            <div ref={setNodeRef} className="space-y-2 min-h-[48px] rounded-lg transition-colors" style={isOver ? { boxShadow: `inset 0 0 0 1px ${color}` } : undefined}>
               {children}
             </div>
           );

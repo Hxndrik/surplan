@@ -67,6 +67,8 @@ export function SqlImportModal({ onClose }: Props) {
         description: '',
         color: pickColor(),
         collapsed: false,
+        updatedAt: Date.now(),
+        tags: [],
         columns: table.columns.map((c, i) => ({
           id: createId(),
           name: c.name,

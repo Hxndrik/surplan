@@ -1,7 +1,15 @@
 {
   "name": "surplan",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "description": "Local-only developer planning tool — database schema designer, API planner, feature tracker, and 18+ export formats",
+  "homepage": "https://surplan.xyz",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Hxndrik/surplan"
+  },
+  "author": "Hendrik",
+  "license": "MIT",
   "type": "module",
   "scripts": {
     "dev": "vite",

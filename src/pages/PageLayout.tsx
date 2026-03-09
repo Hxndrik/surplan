@@ -31,6 +31,10 @@ export function PageLayout({ children, title, subtitle, badge }: PageLayoutProps
     }
   }, [theme]);
 
+  useEffect(() => {
+    document.title = `${title} — surplan`;
+  }, [title]);
+
   return (
     <div className="min-h-screen bg-bg-primary text-text-primary">
       {/* Nav */}

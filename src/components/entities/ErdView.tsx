@@ -20,17 +20,7 @@ const LAYOUT_XGAP = 260;
 const LAYOUT_YGAP = 32;
 const LAYOUT_PAD = 20;
 
-// Simple grid layout (fallback)
-function autoLayout(entities: Entity[]): Map<string, { x: number; y: number }> {
-  const positions = new Map<string, { x: number; y: number }>();
-  const cols = Math.max(1, Math.ceil(Math.sqrt(entities.length)));
-  entities.forEach((e, i) => {
-    const col = i % cols;
-    const row = Math.floor(i / cols);
-    positions.set(e.id, { x: col * LAYOUT_XGAP + LAYOUT_PAD, y: row * 220 + LAYOUT_PAD });
-  });
-  return positions;
-}
+
 
 // FK-aware topological layout: referenced (master) entities come first
 function autoLayoutFK(entities: Entity[]): Map<string, { x: number; y: number }> {
@@ -374,7 +364,8 @@ export function ErdView({ entities, onEntityFocus }: ErdViewProps) {
     a.download = 'erd.svg';
     a.click();
     URL.revokeObjectURL(url);
-  }, [entities, positions, edges, getEdgeData]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [entities, positions]);
   const handleAutoLayout = useCallback(() => {
     const newPositions = autoLayoutFK(entities);
     setPositions(newPositions);

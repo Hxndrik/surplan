@@ -127,6 +127,10 @@ export function Landing() {
     }
   }, [theme]);
 
+  useEffect(() => {
+    document.title = 'surplan — Free Developer Planning Tool | Schema Designer, API Planner & Feature Tracker';
+  }, []);
+
   return (
     <div className="min-h-screen bg-bg-primary text-text-primary">
       {/* Nav */}
@@ -325,7 +329,7 @@ export function Landing() {
           <div className="relative">
             <div className="absolute left-8 top-8 bottom-8 w-px bg-border-default hidden md:block" />
             <div className="space-y-8">
-              {STEPS.map((s, i) => (
+              {STEPS.map((s) => (
                 <div key={s.n} className="flex gap-6 items-start">
                   <div className="flex-shrink-0 w-16 h-16 rounded-xl bg-bg-secondary border border-border-default flex items-center justify-center relative z-10">
                     <span className="text-[10px] font-bold text-accent font-mono">{s.n}</span>

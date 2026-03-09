@@ -10,6 +10,7 @@ type ColumnTemplate = {
   unique?: boolean;
   indexed?: boolean;
   defaultValue?: string;
+  enumValues?: string;
   note?: string;
 };
 
@@ -27,6 +28,7 @@ function buildEntity(template: EntityTemplate): Omit<Entity, 'id' | 'createdAt'>
     color: template.color,
     collapsed: false,
     tags: [],
+    updatedAt: Date.now(),
     columns: template.columns.map((c, i) => ({
       id: createId(),
       name: c.name,
@@ -36,7 +38,7 @@ function buildEntity(template: EntityTemplate): Omit<Entity, 'id' | 'createdAt'>
       unique: c.unique ?? false,
       indexed: c.indexed ?? false,
       defaultValue: c.defaultValue ?? '',
-      enumValues: '',
+      enumValues: c.enumValues ?? '',
       check: '',
       references: null,
       note: c.note ?? '',

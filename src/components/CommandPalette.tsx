@@ -4,7 +4,7 @@ import { useProjectStore } from '../store/useProjectStore';
 import { useUIStore } from '../store/useUIStore';
 import { useToast } from '../hooks/useToast';
 import { ENTITY_TEMPLATES } from '../lib/templates';
-import { backupProject, exportProjectMarkdown, exportOpenApi, exportFeaturesCSV, exportHtmlDocs, importFeaturesCSV, exportGithubIssues, exportChangelog, generateMultiAgentPrompt } from '../lib/backup';
+import { backupProject, exportProjectMarkdown, exportOpenApi, exportFeaturesCSV, exportHtmlDocs, exportGithubIssues, exportChangelog, generateMultiAgentPrompt } from '../lib/backup';
 import type { ActiveTab } from '../types';
 
 interface Command {
