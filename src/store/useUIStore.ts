@@ -3,7 +3,7 @@ import { persist } from 'zustand/middleware';
 import type { ActiveTab, EntityId, ColumnId, Column } from '../types';
 
 export type ColumnClipboard = Omit<Column, 'id' | 'order'>;
-export type Theme = 'dark' | 'light';
+export type Theme = 'dark' | 'light' | 'system';
 
 interface UIStore {
   activeTab: ActiveTab;
@@ -17,7 +17,7 @@ interface UIStore {
   setEditingColumn: (id: ColumnId | null) => void;
   setColumnClipboard: (col: ColumnClipboard | null) => void;
   setErdPositions: (positions: Record<string, { x: number; y: number }>) => void;
-  toggleTheme: () => void;
+  setTheme: (theme: Theme) => void;
 }
 
 export const useUIStore = create<UIStore>()(
@@ -28,25 +28,27 @@ export const useUIStore = create<UIStore>()(
       editingColumnId: null,
       columnClipboard: null,
       erdPositions: {},
-      theme: 'dark',
+      theme: 'system',
       setActiveTab: (tab) => set({ activeTab: tab }),
       setSelectedEntity: (id) => set({ selectedEntityId: id }),
       setEditingColumn: (id) => set({ editingColumnId: id }),
       setColumnClipboard: (col) => set({ columnClipboard: col }),
       setErdPositions: (positions) => set({ erdPositions: positions }),
-      toggleTheme: () =>
-        set((s) => ({ theme: s.theme === 'dark' ? 'light' : 'dark' })),
+      setTheme: (theme) => set({ theme }),
     }),
     {
       name: 'surplan-ui',
-      version: 3,
+      version: 4,
       migrate: (state, version) => {
         const result = state as Record<string, unknown>;
         if (version < 2) {
           return { ...result, erdPositions: {} };
         }
         if (version < 3) {
-          return { ...result, theme: 'dark' };
+          return { ...result, theme: 'system' };
+        }
+        if (version < 4) {
+          return { ...result, theme: 'system' };
         }
         return result;
       },

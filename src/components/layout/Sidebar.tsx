@@ -6,6 +6,7 @@ import { ProjectSwitcher } from './ProjectSwitcher';
 import { backupProject, restoreProject, exportProjectMarkdown } from '../../lib/backup';
 import { useToast } from '../../hooks/useToast';
 import type { ActiveTab } from '../../types';
+import type { Theme } from '../../store/useUIStore';
 
 const tabs: { id: ActiveTab; label: string; icon: string }[] = [
   { id: 'overview', label: 'Overview', icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0h4' },
@@ -17,11 +18,11 @@ const tabs: { id: ActiveTab; label: string; icon: string }[] = [
 interface SidebarProps {
   onCommandPalette?: () => void;
   onHelp?: () => void;
-  onToggleTheme?: () => void;
-  theme?: 'dark' | 'light';
+  onSetTheme?: (theme: Theme) => void;
+  theme?: Theme;
 }
 
-export function Sidebar({ onCommandPalette, onHelp, onToggleTheme, theme }: SidebarProps) {
+export function Sidebar({ onCommandPalette, onHelp, onSetTheme, theme }: SidebarProps) {
   const activeTab = useUIStore((s) => s.activeTab);
   const setActiveTab = useUIStore((s) => s.setActiveTab);
   const entityCount = useEntityStore((s) => s.entities.length);
@@ -177,25 +178,32 @@ export function Sidebar({ onCommandPalette, onHelp, onToggleTheme, theme }: Side
           />
         </div>
 
-        {/* Theme toggle + local only hint */}
-        {onToggleTheme && (
-          <button
-            type="button"
-            onClick={onToggleTheme}
-            title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
-            className="w-full flex items-center justify-between px-2 py-1.5 rounded text-[10px] text-text-muted hover:text-text-secondary hover:bg-bg-hover transition-colors cursor-pointer"
-          >
-            <span>{theme === 'light' ? 'Switch to dark' : 'Switch to light'}</span>
-            {theme === 'light' ? (
-              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z" />
-              </svg>
-            ) : (
-              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" />
-              </svg>
-            )}
-          </button>
+        {/* Theme toggle — three-way segmented control */}
+        {onSetTheme && (
+          <div className="flex rounded-md overflow-hidden border border-border-default">
+            {([
+              { value: 'system' as Theme, label: 'System', icon: 'M9 17.25v1.007a3 3 0 0 1-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0 1 15 18.257V17.25m6-12V15a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 15V5.25A2.25 2.25 0 0 1 5.25 3h13.5A2.25 2.25 0 0 1 21 5.25Z' },
+              { value: 'light' as Theme, label: 'Light', icon: 'M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z' },
+              { value: 'dark' as Theme, label: 'Dark', icon: 'M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z' },
+            ]).map((opt) => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => onSetTheme(opt.value)}
+                title={opt.label}
+                className={`flex-1 flex items-center justify-center gap-1 px-1.5 py-1.5 text-[10px] transition-colors cursor-pointer ${
+                  theme === opt.value
+                    ? 'bg-bg-hover text-text-primary'
+                    : 'text-text-muted hover:text-text-secondary hover:bg-bg-hover/50'
+                }`}
+              >
+                <svg className="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d={opt.icon} />
+                </svg>
+                {opt.label}
+              </button>
+            ))}
+          </div>
         )}
       </div>
     </aside>
