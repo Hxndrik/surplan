@@ -222,7 +222,7 @@ function PlannerApp() {
     <div className="flex h-screen overflow-hidden">
       <Sidebar onCommandPalette={() => setShowCommandPalette(true)} onHelp={() => setShowHelp(true)} onSetTheme={setTheme} theme={theme} />
       <div className="flex-1 flex flex-col min-w-0">
-        <Header onImport={() => setShowImport(true)} onExport={() => openExport()} />
+        <Header />
         <MainContent onExport={() => openExport()} />
       </div>
 

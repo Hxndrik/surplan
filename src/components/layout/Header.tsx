@@ -1,11 +1,9 @@
-import { useRef, useEffect } from 'react';
 import { useProjectStore } from '../../store/useProjectStore';
 import { useProjectsStore } from '../../store/useProjectsStore';
 import { useHistoryStore } from '../../store/useHistoryStore';
 import { useEntityStore } from '../../store/useEntityStore';
 import { useUIStore } from '../../store/useUIStore';
 import { InlineEdit } from '../shared/InlineEdit';
-import { importFeaturesCSV } from '../../lib/backup';
 import { useToast } from '../../hooks/useToast';
 import { generateShareUrl } from '../../lib/sharing';
 
@@ -16,12 +14,7 @@ const TAB_TITLES: Record<string, string> = {
   api: 'API Endpoints',
 };
 
-interface HeaderProps {
-  onImport?: () => void;
-  onExport?: () => void;
-}
-
-export function Header({ onImport, onExport }: HeaderProps) {
+export function Header() {
   const name = useProjectStore((s) => s.meta.name);
   const updateMeta = useProjectStore((s) => s.updateMeta);
   const syncActiveProjectName = useProjectsStore((s) => s.syncActiveProjectName);
@@ -34,29 +27,7 @@ export function Header({ onImport, onExport }: HeaderProps) {
   const features = useProjectStore((s) => s.features);
   const endpoints = useProjectStore((s) => s.endpoints);
   const entityCount = useEntityStore((s) => s.entities.length);
-  const addFeature = useProjectStore((s) => s.addFeature);
-  const addEndpoint = useProjectStore((s) => s.addEndpoint);
-
   const toast = useToast();
-  const csvImportRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    const handler = () => csvImportRef.current?.click();
-    window.addEventListener('surplan:import-features-csv', handler);
-    return () => window.removeEventListener('surplan:import-features-csv', handler);
-  }, []);
-
-  const handleCSVImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const result = await importFeaturesCSV(file);
-    if (result.success) {
-      toast.success(result.message);
-    } else {
-      toast.error(result.message);
-    }
-    e.target.value = '';
-  };
 
   const featureTotal = features.length;
   const featureDone = features.filter((f) => f.done).length;
@@ -154,72 +125,6 @@ export function Header({ onImport, onExport }: HeaderProps) {
           </button>
         </div>
 
-        {activeTab === 'entities' && (
-          <>
-            {onImport && (
-              <button
-                type="button"
-                onClick={onImport}
-                className="flex items-center gap-1.5 text-xs text-text-secondary hover:text-text-primary border border-border-default hover:border-border-active rounded px-2.5 py-1 transition-colors cursor-pointer"
-              >
-                <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                </svg>
-                Import SQL
-              </button>
-            )}
-            {onExport && (
-              <button
-                type="button"
-                onClick={onExport}
-                className="flex items-center gap-1.5 text-xs text-accent border border-accent/30 hover:border-accent/60 hover:bg-accent-muted rounded px-2.5 py-1 transition-colors cursor-pointer"
-              >
-                <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                </svg>
-                Export
-              </button>
-            )}
-          </>
-        )}
-
-        {activeTab === 'features' && (
-          <>
-            <input
-              ref={csvImportRef}
-              type="file"
-              accept=".csv"
-              className="hidden"
-              onChange={handleCSVImport}
-            />
-            <button
-              type="button"
-              onClick={() => addFeature('New feature')}
-              title="New feature (Ctrl+N)"
-              className="flex items-center gap-1.5 text-xs text-accent border border-accent/30 hover:border-accent/60 hover:bg-accent-muted rounded px-2.5 py-1 transition-colors cursor-pointer"
-            >
-              <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-              </svg>
-              New Feature
-            </button>
-          </>
-        )}
-
-        {activeTab === 'api' && (
-          <button
-            type="button"
-            onClick={() => addEndpoint()}
-            title="New endpoint (Ctrl+N)"
-            className="flex items-center gap-1.5 text-xs text-accent border border-accent/30 hover:border-accent/60 hover:bg-accent-muted rounded px-2.5 py-1 transition-colors cursor-pointer"
-          >
-            <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-            </svg>
-            New Endpoint
-          </button>
-        )}
-
         <button
           type="button"
           onClick={async () => {
@@ -232,7 +137,7 @@ export function Header({ onImport, onExport }: HeaderProps) {
             }
           }}
           title="Copy shareable URL to clipboard"
-          className="flex items-center gap-1.5 text-xs text-text-muted hover:text-text-secondary border border-border-default hover:border-border-active rounded px-2.5 py-1 transition-colors cursor-pointer"
+          className="flex items-center gap-1.5 text-xs text-white bg-accent hover:bg-accent-hover rounded px-2.5 py-1 transition-colors cursor-pointer"
         >
           <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />

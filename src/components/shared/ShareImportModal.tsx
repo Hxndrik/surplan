@@ -53,7 +53,7 @@ export function ShareImportModal({ data, onClose }: ShareImportModalProps) {
           <button
             type="button"
             onClick={handleCreate}
-            className="w-full px-4 py-2 rounded text-sm font-medium bg-accent-primary text-white hover:opacity-90 transition-opacity cursor-pointer"
+            className="w-full px-4 py-2 rounded text-sm font-medium bg-accent text-white hover:opacity-90 transition-opacity cursor-pointer"
           >
             Create new project
           </button>
