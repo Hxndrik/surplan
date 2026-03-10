@@ -4,7 +4,7 @@ import { useHistoryStore } from '../store/useHistoryStore';
 import type { Entity, Column, Feature, Priority, Estimate, Milestone } from '../types';
 import { createId } from './id';
 
-interface BackupData {
+export interface BackupData {
   version: number;
   exportedAt: string;
   projectName: string;

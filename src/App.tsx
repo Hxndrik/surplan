@@ -16,6 +16,8 @@ import { useEntityStore } from './store/useEntityStore';
 import { useProjectStore } from './store/useProjectStore';
 import { useHistoryStore } from './store/useHistoryStore';
 import { useHistoryManager } from './hooks/useHistoryManager';
+import { useHashLoader } from './hooks/useHashLoader';
+import { ShareImportModal } from './components/shared/ShareImportModal';
 import { Landing } from './pages/Landing';
 import { Docs } from './pages/Docs';
 import { Pricing } from './pages/Pricing';
@@ -75,6 +77,7 @@ function PlannerApp() {
   const [showStarter, setShowStarter] = useState(false);
 
   useHistoryManager();
+  const { sharedData, clearSharedData } = useHashLoader();
 
   const openExport = useCallback((format?: ExportFormat) => {
     setExportFormat(format ?? 'sql-postgres');
@@ -238,6 +241,7 @@ function PlannerApp() {
       {showHelp && <KeyboardShortcutsModal onClose={() => setShowHelp(false)} />}
       {showFindReplace && <FindReplaceModal onClose={() => setShowFindReplace(false)} />}
       {showStarter && <ProjectStarterModal onClose={() => setShowStarter(false)} />}
+      {sharedData && <ShareImportModal data={sharedData} onClose={clearSharedData} />}
       <ToastContainer />
     </div>
   );

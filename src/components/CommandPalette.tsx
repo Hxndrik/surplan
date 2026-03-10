@@ -5,6 +5,7 @@ import { useUIStore } from '../store/useUIStore';
 import { useToast } from '../hooks/useToast';
 import { ENTITY_TEMPLATES } from '../lib/templates';
 import { backupProject, exportProjectMarkdown, exportOpenApi, exportFeaturesCSV, exportHtmlDocs, exportGithubIssues, exportChangelog, generateMultiAgentPrompt } from '../lib/backup';
+import { generateShareUrl } from '../lib/sharing';
 import type { ActiveTab } from '../types';
 
 interface Command {
@@ -419,6 +420,22 @@ export function CommandPalette({ onClose }: CommandPaletteProps) {
       icon: '📂', category: 'Export',
       keywords: ['restore', 'import', 'json', 'load'],
       action: () => { window.dispatchEvent(new CustomEvent('surplan:restore')); onClose(); },
+    },
+    {
+      id: 'share-url', label: 'Share Project via URL',
+      description: 'Copy a shareable link with compressed project data',
+      icon: '🔗', category: 'Export',
+      keywords: ['share', 'url', 'link', 'copy', 'cloud', 'sync'],
+      action: async () => {
+        try {
+          const url = generateShareUrl();
+          await navigator.clipboard.writeText(url);
+          toast.success('Share link copied!');
+        } catch {
+          toast.error('Project too large for URL sharing. Use Backup instead.');
+        }
+        onClose();
+      },
     },
     {
       id: 'load-starter', label: 'Load Project Starter',
