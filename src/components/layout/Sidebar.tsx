@@ -4,7 +4,6 @@ import { useEntityStore } from '../../store/useEntityStore';
 import { useProjectStore } from '../../store/useProjectStore';
 import { ProjectSwitcher } from './ProjectSwitcher';
 import { backupProject, restoreProject, exportProjectMarkdown } from '../../lib/backup';
-import { generateShareUrl } from '../../lib/sharing';
 import { useToast } from '../../hooks/useToast';
 import type { ActiveTab } from '../../types';
 import type { Theme } from '../../store/useUIStore';
@@ -135,8 +134,8 @@ export function Sidebar({ onCommandPalette, onHelp, onSetTheme, theme }: Sidebar
           </button>
         )}
 
-        {/* Backup / Restore / Export .md in one row */}
-        <div className="flex gap-1">
+        {/* Backup / Restore / Export .md */}
+        <div className="flex flex-wrap gap-1">
           <button
             type="button"
             onClick={backupProject}
@@ -169,25 +168,6 @@ export function Sidebar({ onCommandPalette, onHelp, onSetTheme, theme }: Sidebar
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
             .md
-          </button>
-          <button
-            type="button"
-            onClick={async () => {
-              try {
-                const url = generateShareUrl();
-                await navigator.clipboard.writeText(url);
-                toast.success('Share link copied!');
-              } catch {
-                toast.error('Project too large for URL sharing. Use Backup instead.');
-              }
-            }}
-            title="Copy shareable URL to clipboard"
-            className="flex-1 flex items-center justify-center gap-1 px-2 py-1.5 rounded text-[10px] text-text-muted hover:text-text-secondary hover:bg-bg-hover transition-colors cursor-pointer"
-          >
-            <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-            </svg>
-            Share
           </button>
           <input
             ref={fileInputRef}

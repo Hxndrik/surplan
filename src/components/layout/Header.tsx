@@ -7,6 +7,7 @@ import { useUIStore } from '../../store/useUIStore';
 import { InlineEdit } from '../shared/InlineEdit';
 import { importFeaturesCSV } from '../../lib/backup';
 import { useToast } from '../../hooks/useToast';
+import { generateShareUrl } from '../../lib/sharing';
 
 const TAB_TITLES: Record<string, string> = {
   overview: 'Project Overview',
@@ -219,6 +220,25 @@ export function Header({ onImport, onExport }: HeaderProps) {
           </button>
         )}
 
+        <button
+          type="button"
+          onClick={async () => {
+            try {
+              const url = generateShareUrl();
+              await navigator.clipboard.writeText(url);
+              toast.success('Share link copied!');
+            } catch {
+              toast.error('Project too large for URL sharing. Use Backup instead.');
+            }
+          }}
+          title="Copy shareable URL to clipboard"
+          className="flex items-center gap-1.5 text-xs text-text-muted hover:text-text-secondary border border-border-default hover:border-border-active rounded px-2.5 py-1 transition-colors cursor-pointer"
+        >
+          <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+          </svg>
+          Share
+        </button>
         <span className="text-[10px] text-text-muted flex items-center gap-1.5 ml-1">
           <span className="w-1.5 h-1.5 rounded-full bg-success inline-block" />
           Saved locally
