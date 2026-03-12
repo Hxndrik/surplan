@@ -95,7 +95,6 @@ export const ColumnRow = memo(function ColumnRow({ column, entityId, highlight }
     if (s.references !== undefined) patch.references = s.references;
     updateColumn(entityId, column.id, patch);
     if (s.dataType === 'enum') setExpanded(true);
-    if (s.references) setExpanded(true);
     setSuggestions([]);
     setSuggestionIndex(-1);
   }, [entityId, column.id, updateColumn]);
