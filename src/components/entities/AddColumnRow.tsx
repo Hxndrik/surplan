@@ -124,7 +124,7 @@ export function AddColumnRow({ entityId }: AddColumnRowProps) {
       <button
         type="button"
         onClick={handleAdd}
-        className="flex-1 text-left text-xs text-text-muted hover:text-text-secondary px-3 py-1.5 hover:bg-bg-hover transition-colors cursor-pointer flex items-center gap-2"
+        className="flex-1 text-left text-[10px] text-text-muted hover:text-text-secondary px-2 py-1 hover:bg-bg-hover transition-colors cursor-pointer flex items-center gap-1.5"
       >
         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
