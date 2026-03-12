@@ -61,6 +61,7 @@ export interface Entity {
   createdAt: number;
   updatedAt: number;
   tags: string[];
+  lineBreak?: boolean;
 }
 
 export type Estimate = '' | '1' | '2' | '3' | '5' | '8' | '13' | '?';

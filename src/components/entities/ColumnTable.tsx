@@ -48,7 +48,7 @@ export function ColumnTable({ columns, entityId, highlight, filter }: ColumnTabl
   return (
     <div>
       {/* Column header — matches ColumnRow grid exactly */}
-      <div className="grid grid-cols-[1fr_72px_28px_28px_16px] gap-0 px-3 py-1 text-text-muted/80 uppercase tracking-wider text-[9px] border-b border-border-default">
+      <div className="grid grid-cols-[1fr_72px_28px_28px_16px_16px] gap-0 px-3 py-1 text-text-muted/80 uppercase tracking-wider text-[9px] border-b border-border-default">
         <span>
           Name
           {q && (
@@ -60,6 +60,7 @@ export function ColumnTable({ columns, entityId, highlight, filter }: ColumnTabl
         <span>Type</span>
         <span className="text-center">Null</span>
         <span className="text-center">PK</span>
+        <span />
         <span />
       </div>
 

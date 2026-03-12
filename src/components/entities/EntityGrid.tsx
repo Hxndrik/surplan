@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import type { DragEndEvent } from '@dnd-kit/core';
 import { SortableContext, useSortable, rectSortingStrategy } from '@dnd-kit/sortable';
@@ -526,17 +526,19 @@ export function EntityGrid({ onExport }: EntityGridProps) {
           <SortableContext items={filteredSorted.map((e) => e.id)} strategy={rectSortingStrategy}>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 2xl:grid-cols-8 gap-2 items-start">
               {filteredSorted.map((entity) => (
-                <SortableEntityCard
-                  key={entity.id}
-                  entity={entity}
-                  highlight={q || undefined}
-                  flash={flashEntityId === entity.id}
-                  columnMatchCount={q ? (columnMatchCounts.get(entity.id) ?? 0) : undefined}
-                  cardRef={(el) => {
-                    if (el) entityCardRefs.current.set(entity.id, el);
-                    else entityCardRefs.current.delete(entity.id);
-                  }}
-                />
+                <React.Fragment key={entity.id}>
+                  <SortableEntityCard
+                    entity={entity}
+                    highlight={q || undefined}
+                    flash={flashEntityId === entity.id}
+                    columnMatchCount={q ? (columnMatchCounts.get(entity.id) ?? 0) : undefined}
+                    cardRef={(el) => {
+                      if (el) entityCardRefs.current.set(entity.id, el);
+                      else entityCardRefs.current.delete(entity.id);
+                    }}
+                  />
+                  {entity.lineBreak && <div className="col-span-full" />}
+                </React.Fragment>
               ))}
               {!search && <NewEntityButton />}
             </div>
