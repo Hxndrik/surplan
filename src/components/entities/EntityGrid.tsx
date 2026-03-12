@@ -524,7 +524,7 @@ export function EntityGrid({ onExport }: EntityGridProps) {
       ) : (
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={sortEntities === 'default' ? handleDragEnd : undefined}>
           <SortableContext items={filteredSorted.map((e) => e.id)} strategy={rectSortingStrategy}>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 items-start">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 2xl:grid-cols-8 gap-2 items-start">
               {filteredSorted.map((entity) => (
                 <SortableEntityCard
                   key={entity.id}

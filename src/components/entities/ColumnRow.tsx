@@ -147,22 +147,15 @@ export const ColumnRow = memo(function ColumnRow({ column, entityId, highlight }
       style={style}
       className={`border-b border-border-default/50 transition-colors ${isDragging ? 'opacity-50 bg-bg-hover' : ''} ${isMatch ? 'bg-accent-muted/30' : ''}`}
     >
-      {/* Compact main row: name | type | badges | delete */}
-      <div className="flex items-center gap-1 px-2 py-[3px] group hover:bg-bg-hover/50 transition-colors">
-        {/* Drag handle - only on hover */}
-        <button
-          type="button"
-          className="cursor-grab text-text-muted hover:text-text-secondary transition-all touch-none opacity-0 group-hover:opacity-100 flex-shrink-0 w-3"
-          {...attributes}
-          {...listeners}
-        >
-          <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M7 2a2 2 0 10.001 4.001A2 2 0 007 2zm0 6a2 2 0 10.001 4.001A2 2 0 007 8zm0 6a2 2 0 10.001 4.001A2 2 0 007 14zm6-8a2 2 0 10-.001-4.001A2 2 0 0013 6zm0 2a2 2 0 10.001 4.001A2 2 0 0013 8zm0 6a2 2 0 10.001 4.001A2 2 0 0013 14z" />
-          </svg>
-        </button>
-
-        {/* Name */}
-        <div className="relative flex-1 min-w-0">
+      {/* Landing-page style grid: NAME | TYPE | NULL | PK | expand */}
+      <div
+        className="grid grid-cols-[1fr_72px_28px_28px_16px] gap-0 items-center px-3 py-1 group hover:bg-bg-hover/50 transition-colors text-[10px]"
+        {...attributes}
+        {...listeners}
+        style={{ cursor: 'grab' }}
+      >
+        {/* Name - mono, truncates */}
+        <div className="relative min-w-0">
           <input
             ref={nameRef}
             type="text"
@@ -171,7 +164,8 @@ export const ColumnRow = memo(function ColumnRow({ column, entityId, highlight }
               updateColumn(entityId, column.id, { name: e.target.value });
               computeSuggestions(e.target.value);
             }}
-            onFocus={() => {
+            onFocus={(e) => {
+              e.stopPropagation();
               setEditingColumn(column.id);
               computeSuggestions(column.name);
             }}
@@ -197,7 +191,7 @@ export const ColumnRow = memo(function ColumnRow({ column, entityId, highlight }
               }
             }}
             placeholder="column_name"
-            className="text-[11px] bg-transparent outline-none text-text-primary placeholder:text-text-placeholder px-1 py-0 rounded hover:bg-bg-tertiary focus:bg-bg-tertiary transition-colors w-full min-w-0 font-mono"
+            className="font-mono text-[11px] bg-transparent outline-none text-text-primary placeholder:text-text-placeholder py-0 rounded hover:bg-bg-tertiary focus:bg-bg-tertiary transition-colors w-full min-w-0 truncate"
           />
           {suggestions.length > 0 && (
             <div
@@ -233,8 +227,16 @@ export const ColumnRow = memo(function ColumnRow({ column, entityId, highlight }
           )}
         </div>
 
-        {/* Compact type selector */}
-        <div className="flex-shrink-0 w-[72px]">
+        {/* Type - colored like landing page */}
+        <span
+          className="text-accent/80 truncate cursor-pointer hover:text-accent transition-colors"
+          onClick={(e) => {
+            e.stopPropagation();
+            // Find the DataTypeSelect and open it programmatically
+            const el = e.currentTarget.querySelector('[data-type-trigger]') as HTMLButtonElement;
+            el?.click();
+          }}
+        >
           <DataTypeSelect
             value={column.dataType}
             onChange={(v: DataType) => {
@@ -242,76 +244,44 @@ export const ColumnRow = memo(function ColumnRow({ column, entityId, highlight }
               if (v === 'enum') setExpanded(true);
             }}
           />
-        </div>
+        </span>
 
-        {/* Inline badges - compact constraint indicators */}
-        <div className="flex items-center gap-0.5 flex-shrink-0">
-          {column.primaryKey && (
-            <span className="text-[8px] font-bold text-warning bg-warning-muted rounded px-1 py-0.5 leading-none">
-              PK
-            </span>
-          )}
-          {column.unique && !column.primaryKey && (
-            <span className="text-[8px] font-bold text-accent bg-accent-muted rounded px-1 py-0.5 leading-none">
-              UQ
-            </span>
-          )}
-          {column.nullable && (
-            <span className="text-[8px] text-text-muted bg-bg-tertiary rounded px-1 py-0.5 leading-none">
-              ?
-            </span>
-          )}
-          {column.references && (
-            <span
-              className="text-[8px] text-accent bg-accent-muted rounded px-1 py-0.5 leading-none font-mono whitespace-nowrap max-w-[60px] truncate"
-              title={`FK → ${column.references.entityName}.${column.references.columnName}`}
-            >
-              {column.references.entityName}
-            </span>
-          )}
-          {column.indexed && !column.primaryKey && (
-            <span className="text-[8px] text-text-muted bg-bg-tertiary rounded px-1 py-0.5 leading-none">
-              IDX
-            </span>
-          )}
-          {column.defaultValue && !expanded && (
-            <span
-              className="text-[8px] text-text-muted bg-bg-tertiary rounded px-1 py-0.5 leading-none font-mono max-w-[48px] truncate"
-              title={`Default: ${column.defaultValue}`}
-            >
-              ={column.defaultValue.length > 6 ? column.defaultValue.slice(0, 6) + '\u2026' : column.defaultValue}
-            </span>
-          )}
-        </div>
+        {/* Nullable - circle/dash indicator, click to toggle */}
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); updateColumn(entityId, column.id, { nullable: !column.nullable }); }}
+          className="text-center text-text-muted hover:text-text-secondary cursor-pointer transition-colors"
+          title={column.nullable ? 'Nullable (click to toggle)' : 'Not null (click to toggle)'}
+        >
+          {column.nullable ? '○' : '—'}
+        </button>
 
-        {/* Expand toggle */}
+        {/* PK - star/dash indicator, click to toggle */}
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); updateColumn(entityId, column.id, { primaryKey: !column.primaryKey }); }}
+          className={`text-center cursor-pointer transition-colors ${column.primaryKey ? 'text-warning' : 'text-text-muted hover:text-text-secondary'}`}
+          title={column.primaryKey ? 'Primary Key (click to toggle)' : 'Not PK (click to toggle)'}
+        >
+          {column.primaryKey ? '★' : '—'}
+        </button>
+
+        {/* Expand chevron */}
         <button
           type="button"
           title={expanded ? 'Collapse' : 'Edit details'}
-          onClick={() => setExpanded(!expanded)}
-          className={`flex-shrink-0 cursor-pointer transition-all ${
+          onClick={(e) => { e.stopPropagation(); setExpanded(!expanded); }}
+          className={`justify-self-center cursor-pointer transition-all ${
             hasExtra || expanded
               ? 'text-accent opacity-100'
               : 'text-text-muted opacity-0 group-hover:opacity-100'
           }`}
         >
           <svg
-            className={`w-3 h-3 transition-transform ${expanded ? 'rotate-180' : ''}`}
+            className={`w-2.5 h-2.5 transition-transform ${expanded ? 'rotate-180' : ''}`}
             fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"
           >
             <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-          </svg>
-        </button>
-
-        {/* Delete - hover only */}
-        <button
-          type="button"
-          onClick={() => removeColumn(entityId, column.id)}
-          title="Delete column"
-          className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity text-text-muted hover:text-danger cursor-pointer"
-        >
-          <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
       </div>
@@ -355,7 +325,7 @@ export const ColumnRow = memo(function ColumnRow({ column, entityId, highlight }
             </label>
           </div>
 
-          {/* Row 2: default value */}
+          {/* Default value */}
           <div className="flex items-center gap-2">
             <span className="text-[10px] text-text-muted flex-shrink-0 w-12">Default</span>
             <input
@@ -478,6 +448,14 @@ export const ColumnRow = memo(function ColumnRow({ column, entityId, highlight }
               }`}
             >
               {clipped ? 'Copied!' : 'Clipboard'}
+            </button>
+            <div className="flex-1" />
+            <button
+              type="button"
+              onClick={() => removeColumn(entityId, column.id)}
+              className="text-[10px] px-2 py-0.5 rounded border text-danger border-danger/30 hover:bg-danger-muted transition-colors cursor-pointer"
+            >
+              Delete
             </button>
           </div>
         </div>
