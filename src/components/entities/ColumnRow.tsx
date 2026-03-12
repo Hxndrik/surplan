@@ -6,7 +6,6 @@ import { useEntityStore } from '../../store/useEntityStore';
 import { useUIStore } from '../../store/useUIStore';
 import { DataTypeSelect } from './DataTypeSelect';
 import { Toggle } from '../shared/Toggle';
-import { IconButton } from '../shared/IconButton';
 import { FKSelect } from './FKSelect';
 import { COLUMN_SUGGESTIONS } from '../../lib/constants';
 import type { ColumnSuggestion } from '../../lib/constants';
@@ -55,7 +54,6 @@ export const ColumnRow = memo(function ColumnRow({ column, entityId, highlight }
     if (!val.trim()) { setSuggestions([]); return; }
     const lower = val.toLowerCase();
 
-    // Auto-FK detection: if name ends with _id, try to find a matching entity
     const fkSuggestions: ColumnSuggestion[] = [];
     const idSuffix = lower.endsWith('_id') ? '_id' : lower.endsWith('id') && lower.length > 2 ? 'id' : null;
     if (idSuffix) {
@@ -97,7 +95,7 @@ export const ColumnRow = memo(function ColumnRow({ column, entityId, highlight }
     if (s.references !== undefined) patch.references = s.references;
     updateColumn(entityId, column.id, patch);
     if (s.dataType === 'enum') setExpanded(true);
-    if (s.references) setExpanded(true); // show FK ref in expanded view
+    if (s.references) setExpanded(true);
     setSuggestions([]);
     setSuggestionIndex(-1);
   }, [entityId, column.id, updateColumn]);
@@ -147,24 +145,24 @@ export const ColumnRow = memo(function ColumnRow({ column, entityId, highlight }
     <div
       ref={setNodeRef}
       style={style}
-      className={`border-b border-border-default transition-colors ${isDragging ? 'opacity-50 bg-bg-hover' : ''} ${isMatch ? 'bg-accent-muted/30' : ''}`}
+      className={`border-b border-border-default/50 transition-colors ${isDragging ? 'opacity-50 bg-bg-hover' : ''} ${isMatch ? 'bg-accent-muted/30' : ''}`}
     >
-      {/* Main row */}
-      <div className="grid grid-cols-[18px_1fr_96px_34px_32px_32px_1fr_24px_24px_24px_24px] gap-1 items-center px-2 py-1 group hover:bg-bg-hover transition-colors">
-        {/* Drag handle */}
+      {/* Compact main row: name | type | badges | delete */}
+      <div className="flex items-center gap-1 px-2 py-[3px] group hover:bg-bg-hover/50 transition-colors">
+        {/* Drag handle - only on hover */}
         <button
           type="button"
-          className="cursor-grab text-text-muted hover:text-text-secondary transition-colors touch-none"
+          className="cursor-grab text-text-muted hover:text-text-secondary transition-all touch-none opacity-0 group-hover:opacity-100 flex-shrink-0 w-3"
           {...attributes}
           {...listeners}
         >
-          <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+          <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20">
             <path d="M7 2a2 2 0 10.001 4.001A2 2 0 007 2zm0 6a2 2 0 10.001 4.001A2 2 0 007 8zm0 6a2 2 0 10.001 4.001A2 2 0 007 14zm6-8a2 2 0 10-.001-4.001A2 2 0 0013 6zm0 2a2 2 0 10.001 4.001A2 2 0 0013 8zm0 6a2 2 0 10.001 4.001A2 2 0 0013 14z" />
           </svg>
         </button>
 
         {/* Name */}
-        <div className="relative w-full min-w-0">
+        <div className="relative flex-1 min-w-0">
           <input
             ref={nameRef}
             type="text"
@@ -179,7 +177,6 @@ export const ColumnRow = memo(function ColumnRow({ column, entityId, highlight }
             }}
             onBlur={() => {
               setEditingColumn(null);
-              // Delay hide so click on suggestion registers
               setTimeout(() => setSuggestions([]), 150);
             }}
             onKeyDown={(e) => {
@@ -200,7 +197,7 @@ export const ColumnRow = memo(function ColumnRow({ column, entityId, highlight }
               }
             }}
             placeholder="column_name"
-            className="text-xs bg-transparent outline-none text-text-primary placeholder:text-text-placeholder px-1 py-0.5 rounded hover:bg-bg-tertiary focus:bg-bg-tertiary transition-colors w-full min-w-0"
+            className="text-[11px] bg-transparent outline-none text-text-primary placeholder:text-text-placeholder px-1 py-0 rounded hover:bg-bg-tertiary focus:bg-bg-tertiary transition-colors w-full min-w-0 font-mono"
           />
           {suggestions.length > 0 && (
             <div
@@ -236,109 +233,64 @@ export const ColumnRow = memo(function ColumnRow({ column, entityId, highlight }
           )}
         </div>
 
-        {/* Data Type */}
-        <DataTypeSelect
-          value={column.dataType}
-          onChange={(v: DataType) => {
-            updateColumn(entityId, column.id, { dataType: v });
-            if (v === 'enum') setExpanded(true);
-          }}
-        />
-
-        {/* Nullable toggle */}
-        <div className="flex justify-center" title="Nullable">
-          <Toggle
-            checked={column.nullable}
-            onChange={(v) => updateColumn(entityId, column.id, { nullable: v })}
-            label="Nullable"
+        {/* Compact type selector */}
+        <div className="flex-shrink-0 w-[72px]">
+          <DataTypeSelect
+            value={column.dataType}
+            onChange={(v: DataType) => {
+              updateColumn(entityId, column.id, { dataType: v });
+              if (v === 'enum') setExpanded(true);
+            }}
           />
         </div>
 
-        {/* Primary Key badge */}
-        <div className="flex justify-center">
-          <button
-            type="button"
-            title="Primary Key"
-            onClick={() => updateColumn(entityId, column.id, { primaryKey: !column.primaryKey })}
-            className={`text-[9px] font-bold px-1 py-0.5 rounded cursor-pointer transition-colors leading-none ${
-              column.primaryKey
-                ? 'bg-warning-muted text-warning'
-                : 'text-text-muted hover:text-text-secondary'
-            }`}
-          >
-            PK
-          </button>
-        </div>
-
-        {/* Unique badge */}
-        <div className="flex justify-center">
-          <button
-            type="button"
-            title="Unique"
-            onClick={() => updateColumn(entityId, column.id, { unique: !column.unique })}
-            className={`text-[9px] font-bold px-1 py-0.5 rounded cursor-pointer transition-colors leading-none ${
-              column.unique
-                ? 'bg-accent-muted text-accent'
-                : 'text-text-muted hover:text-text-secondary'
-            }`}
-          >
-            UQ
-          </button>
-        </div>
-
-        {/* Note + FK indicator */}
-        <div className="flex items-center gap-1 min-w-0 overflow-hidden">
-          {column.indexed && !column.primaryKey && (
-            <span
-              className="flex-shrink-0 text-[9px] font-bold text-text-muted bg-bg-tertiary border border-border-default rounded px-1 py-0.5 leading-none"
-              title="Indexed"
-            >
-              IDX
+        {/* Inline badges - compact constraint indicators */}
+        <div className="flex items-center gap-0.5 flex-shrink-0">
+          {column.primaryKey && (
+            <span className="text-[8px] font-bold text-warning bg-warning-muted rounded px-1 py-0.5 leading-none">
+              PK
             </span>
           )}
-          {column.check?.trim() && !expanded && (
-            <span
-              className="flex-shrink-0 text-[9px] font-bold text-text-muted bg-bg-tertiary border border-border-default rounded px-1 py-0.5 leading-none"
-              title={`CHECK: ${column.check}`}
-            >
-              CHK
+          {column.unique && !column.primaryKey && (
+            <span className="text-[8px] font-bold text-accent bg-accent-muted rounded px-1 py-0.5 leading-none">
+              UQ
             </span>
           )}
-          {column.defaultValue && !expanded && (
-            <span
-              className="flex-shrink-0 text-[9px] text-text-muted bg-bg-tertiary border border-border-default rounded px-1 py-0.5 leading-none font-mono max-w-[64px] truncate"
-              title={`Default: ${column.defaultValue}`}
-            >
-              ={column.defaultValue.length > 8 ? column.defaultValue.slice(0, 8) + '\u2026' : column.defaultValue}
+          {column.nullable && (
+            <span className="text-[8px] text-text-muted bg-bg-tertiary rounded px-1 py-0.5 leading-none">
+              ?
             </span>
           )}
           {column.references && (
             <span
-              className="flex-shrink-0 inline-flex items-center gap-0.5 text-[9px] text-accent bg-accent-muted rounded px-1 py-0.5 font-mono leading-none whitespace-nowrap"
+              className="text-[8px] text-accent bg-accent-muted rounded px-1 py-0.5 leading-none font-mono whitespace-nowrap max-w-[60px] truncate"
               title={`FK → ${column.references.entityName}.${column.references.columnName}`}
             >
-              <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-              </svg>
               {column.references.entityName}
             </span>
           )}
-          <input
-            type="text"
-            value={column.note}
-            onChange={(e) => updateColumn(entityId, column.id, { note: e.target.value })}
-            placeholder={column.references ? '' : 'note...'}
-            className="text-xs bg-transparent outline-none text-text-muted placeholder:text-text-placeholder px-1 py-0.5 rounded hover:bg-bg-tertiary focus:bg-bg-tertiary focus:text-text-secondary transition-colors flex-1 min-w-0"
-          />
+          {column.indexed && !column.primaryKey && (
+            <span className="text-[8px] text-text-muted bg-bg-tertiary rounded px-1 py-0.5 leading-none">
+              IDX
+            </span>
+          )}
+          {column.defaultValue && !expanded && (
+            <span
+              className="text-[8px] text-text-muted bg-bg-tertiary rounded px-1 py-0.5 leading-none font-mono max-w-[48px] truncate"
+              title={`Default: ${column.defaultValue}`}
+            >
+              ={column.defaultValue.length > 6 ? column.defaultValue.slice(0, 6) + '\u2026' : column.defaultValue}
+            </span>
+          )}
         </div>
 
-        {/* Expand toggle - shows extra options */}
+        {/* Expand toggle */}
         <button
           type="button"
-          title={expanded ? 'Collapse' : 'More options (default, FK, index)'}
+          title={expanded ? 'Collapse' : 'Edit details'}
           onClick={() => setExpanded(!expanded)}
-          className={`cursor-pointer transition-all ${
-            hasExtra
+          className={`flex-shrink-0 cursor-pointer transition-all ${
+            hasExtra || expanded
               ? 'text-accent opacity-100'
               : 'text-text-muted opacity-0 group-hover:opacity-100'
           }`}
@@ -351,131 +303,109 @@ export const ColumnRow = memo(function ColumnRow({ column, entityId, highlight }
           </svg>
         </button>
 
-        {/* Copy SQL */}
-        <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-          <button
-            type="button"
-            onClick={copySQL}
-            title="Copy column as SQL"
-            className={`w-5 h-5 flex items-center justify-center rounded transition-colors cursor-pointer ${copied ? 'text-success' : 'text-text-muted hover:text-text-secondary hover:bg-bg-hover'}`}
-          >
-            {copied ? (
-              <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-              </svg>
-            ) : (
-              <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-              </svg>
-            )}
-          </button>
-        </div>
-
-        {/* Duplicate */}
-        <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-          <button
-            type="button"
-            onClick={() => duplicateColumn(entityId, column.id)}
-            title="Duplicate column"
-            className="w-5 h-5 flex items-center justify-center rounded transition-colors cursor-pointer text-text-muted hover:text-text-secondary hover:bg-bg-hover"
-          >
-            <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-            </svg>
-          </button>
-        </div>
-
-        {/* Copy to column clipboard */}
-        <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-          <button
-            type="button"
-            onClick={copyToColumnClipboard}
-            title="Copy column definition to clipboard (paste in other entities)"
-            className={`w-5 h-5 flex items-center justify-center rounded transition-colors cursor-pointer ${
-              clipped || isInClipboard ? 'text-accent' : 'text-text-muted hover:text-text-secondary hover:bg-bg-hover'
-            }`}
-          >
-            {clipped ? (
-              <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-              </svg>
-            ) : (
-              <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 11v6M9 14h6" />
-              </svg>
-            )}
-          </button>
-        </div>
-
-        {/* Delete */}
-        <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-          <IconButton
-            onClick={() => removeColumn(entityId, column.id)}
-            title="Delete column"
-            variant="danger"
-          >
-            <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </IconButton>
-        </div>
+        {/* Delete - hover only */}
+        <button
+          type="button"
+          onClick={() => removeColumn(entityId, column.id)}
+          title="Delete column"
+          className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity text-text-muted hover:text-danger cursor-pointer"
+        >
+          <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
       </div>
 
-      {/* Expanded extra options */}
+      {/* Expanded panel - all detailed editing controls */}
       {expanded && (
-        <div className="grid grid-cols-3 gap-2 px-9 py-2 bg-bg-primary/40 border-t border-border-default animate-fade-in">
-          {/* Index */}
-          <label className="flex items-center gap-2 cursor-pointer">
-            <Toggle
-              checked={column.indexed}
-              onChange={(v) => updateColumn(entityId, column.id, { indexed: v })}
-              label="Indexed"
-            />
-            <span className="text-[10px] text-text-muted">Indexed</span>
-          </label>
-
-          {/* Default value */}
-          <div className="flex flex-col gap-1 col-span-2">
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] text-text-muted flex-shrink-0 w-12">Default</span>
-              <input
-                type="text"
-                value={column.defaultValue}
-                onChange={(e) => updateColumn(entityId, column.id, { defaultValue: e.target.value })}
-                placeholder="e.g. now(), true, 0, ''"
-                className="flex-1 text-[10px] bg-bg-tertiary border border-border-default rounded px-2 py-0.5 text-text-secondary outline-none focus:border-border-focus placeholder:text-text-placeholder min-w-0"
+        <div className="px-6 py-2 bg-bg-primary/40 border-t border-border-default/50 animate-fade-in space-y-2">
+          {/* Row 1: constraint toggles */}
+          <div className="flex items-center gap-4 flex-wrap">
+            <label className="flex items-center gap-1.5 cursor-pointer">
+              <Toggle
+                checked={column.primaryKey}
+                onChange={(v) => updateColumn(entityId, column.id, { primaryKey: v })}
+                label="Primary Key"
               />
-            </div>
-            {!column.defaultValue && (
-              <div className="flex items-center gap-1 flex-wrap pl-14">
-                {((): { label: string; value: string }[] => {
-                  const isNumeric = ['integer', 'bigint', 'smallint', 'float', 'decimal', 'numeric', 'number'].includes(column.dataType);
-                  const isDate = ['date', 'datetime', 'timestamp', 'timestamptz'].includes(column.dataType);
-                  const isBool = column.dataType === 'boolean';
-                  const isUuid = column.dataType === 'uuid';
-                  if (isUuid) return [{ label: 'gen_random_uuid()', value: 'gen_random_uuid()' }, { label: 'uuid_generate_v4()', value: 'uuid_generate_v4()' }];
-                  if (isDate) return [{ label: 'now()', value: 'now()' }, { label: 'CURRENT_TIMESTAMP', value: 'CURRENT_TIMESTAMP' }];
-                  if (isBool) return [{ label: 'true', value: 'true' }, { label: 'false', value: 'false' }];
-                  if (isNumeric) return [{ label: '0', value: '0' }, { label: '1', value: '1' }];
-                  return [{ label: "''", value: "''" }, { label: 'NULL', value: 'NULL' }];
-                })().map(({ label, value }) => (
-                  <button
-                    key={label}
-                    type="button"
-                    onClick={() => updateColumn(entityId, column.id, { defaultValue: value })}
-                    className="text-[9px] font-mono px-1.5 py-0.5 rounded cursor-pointer border text-text-muted border-border-default hover:border-border-active hover:text-text-secondary bg-bg-primary transition-colors"
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-            )}
+              <span className="text-[10px] text-text-muted">Primary Key</span>
+            </label>
+            <label className="flex items-center gap-1.5 cursor-pointer">
+              <Toggle
+                checked={column.unique}
+                onChange={(v) => updateColumn(entityId, column.id, { unique: v })}
+                label="Unique"
+              />
+              <span className="text-[10px] text-text-muted">Unique</span>
+            </label>
+            <label className="flex items-center gap-1.5 cursor-pointer">
+              <Toggle
+                checked={column.nullable}
+                onChange={(v) => updateColumn(entityId, column.id, { nullable: v })}
+                label="Nullable"
+              />
+              <span className="text-[10px] text-text-muted">Nullable</span>
+            </label>
+            <label className="flex items-center gap-1.5 cursor-pointer">
+              <Toggle
+                checked={column.indexed}
+                onChange={(v) => updateColumn(entityId, column.id, { indexed: v })}
+                label="Indexed"
+              />
+              <span className="text-[10px] text-text-muted">Indexed</span>
+            </label>
           </div>
 
-          {/* Enum values — only shown when dataType is 'enum' */}
+          {/* Row 2: default value */}
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] text-text-muted flex-shrink-0 w-12">Default</span>
+            <input
+              type="text"
+              value={column.defaultValue}
+              onChange={(e) => updateColumn(entityId, column.id, { defaultValue: e.target.value })}
+              placeholder="e.g. now(), true, 0, ''"
+              className="flex-1 text-[10px] bg-bg-tertiary border border-border-default rounded px-2 py-0.5 text-text-secondary outline-none focus:border-border-focus placeholder:text-text-placeholder min-w-0"
+            />
+          </div>
+          {!column.defaultValue && (
+            <div className="flex items-center gap-1 flex-wrap pl-14">
+              {((): { label: string; value: string }[] => {
+                const isNumeric = ['integer', 'bigint', 'smallint', 'float', 'decimal', 'numeric', 'number'].includes(column.dataType);
+                const isDate = ['date', 'datetime', 'timestamp', 'timestamptz'].includes(column.dataType);
+                const isBool = column.dataType === 'boolean';
+                const isUuid = column.dataType === 'uuid';
+                if (isUuid) return [{ label: 'gen_random_uuid()', value: 'gen_random_uuid()' }, { label: 'uuid_generate_v4()', value: 'uuid_generate_v4()' }];
+                if (isDate) return [{ label: 'now()', value: 'now()' }, { label: 'CURRENT_TIMESTAMP', value: 'CURRENT_TIMESTAMP' }];
+                if (isBool) return [{ label: 'true', value: 'true' }, { label: 'false', value: 'false' }];
+                if (isNumeric) return [{ label: '0', value: '0' }, { label: '1', value: '1' }];
+                return [{ label: "''", value: "''" }, { label: 'NULL', value: 'NULL' }];
+              })().map(({ label, value }) => (
+                <button
+                  key={label}
+                  type="button"
+                  onClick={() => updateColumn(entityId, column.id, { defaultValue: value })}
+                  className="text-[9px] font-mono px-1.5 py-0.5 rounded cursor-pointer border text-text-muted border-border-default hover:border-border-active hover:text-text-secondary bg-bg-primary transition-colors"
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Note */}
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] text-text-muted flex-shrink-0 w-12">Note</span>
+            <input
+              type="text"
+              value={column.note}
+              onChange={(e) => updateColumn(entityId, column.id, { note: e.target.value })}
+              placeholder="Description or note..."
+              className="flex-1 text-[10px] bg-bg-tertiary border border-border-default rounded px-2 py-0.5 text-text-secondary outline-none focus:border-border-focus placeholder:text-text-placeholder min-w-0"
+            />
+          </div>
+
+          {/* Enum values */}
           {column.dataType === 'enum' && (
-            <div className="col-span-3 flex items-center gap-2">
+            <div className="flex items-center gap-2">
               <span className="text-[10px] text-text-muted flex-shrink-0 w-12">Values</span>
               <input
                 type="text"
@@ -488,19 +418,19 @@ export const ColumnRow = memo(function ColumnRow({ column, entityId, highlight }
           )}
 
           {/* Check constraint */}
-          <div className="col-span-3 flex items-center gap-2">
+          <div className="flex items-center gap-2">
             <span className="text-[10px] text-text-muted flex-shrink-0 w-12">Check</span>
             <input
               type="text"
               value={column.check ?? ''}
               onChange={(e) => updateColumn(entityId, column.id, { check: e.target.value })}
-              placeholder="e.g. age > 0, price >= 0, length(name) > 2"
+              placeholder="e.g. age > 0, price >= 0"
               className="flex-1 text-[10px] bg-bg-tertiary border border-border-default rounded px-2 py-0.5 text-text-secondary outline-none focus:border-border-focus placeholder:text-text-placeholder min-w-0 font-mono"
             />
           </div>
 
           {/* FK reference */}
-          <div className="col-span-3 flex items-center gap-2">
+          <div className="flex items-center gap-2">
             <span className="text-[10px] text-text-muted flex-shrink-0 w-12">FK ref</span>
             <div className="flex-1">
               <FKSelect
@@ -522,6 +452,33 @@ export const ColumnRow = memo(function ColumnRow({ column, entityId, highlight }
                 </svg>
               </button>
             )}
+          </div>
+
+          {/* Action buttons row */}
+          <div className="flex items-center gap-2 pt-1 border-t border-border-default/30">
+            <button
+              type="button"
+              onClick={copySQL}
+              className={`text-[10px] px-2 py-0.5 rounded border transition-colors cursor-pointer ${copied ? 'text-success border-success/30' : 'text-text-muted border-border-default hover:border-border-active hover:text-text-secondary'}`}
+            >
+              {copied ? 'Copied!' : 'Copy SQL'}
+            </button>
+            <button
+              type="button"
+              onClick={() => duplicateColumn(entityId, column.id)}
+              className="text-[10px] px-2 py-0.5 rounded border text-text-muted border-border-default hover:border-border-active hover:text-text-secondary transition-colors cursor-pointer"
+            >
+              Duplicate
+            </button>
+            <button
+              type="button"
+              onClick={copyToColumnClipboard}
+              className={`text-[10px] px-2 py-0.5 rounded border transition-colors cursor-pointer ${
+                clipped || isInClipboard ? 'text-accent border-accent/30' : 'text-text-muted border-border-default hover:border-border-active hover:text-text-secondary'
+              }`}
+            >
+              {clipped ? 'Copied!' : 'Clipboard'}
+            </button>
           </div>
         </div>
       )}

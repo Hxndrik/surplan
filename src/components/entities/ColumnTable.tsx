@@ -47,28 +47,14 @@ export function ColumnTable({ columns, entityId, highlight, filter }: ColumnTabl
 
   return (
     <div>
-      {/* Column headers — matches ColumnRow grid */}
-      <div className="grid grid-cols-[18px_1fr_96px_34px_32px_32px_1fr_24px_24px_24px] gap-1 items-center px-2 py-1 border-b border-border-default text-[10px] text-text-muted/80 uppercase tracking-wide font-medium">
-        <span />
-        <span className="flex items-center gap-1.5">
-          Name
-          {q && (
-            <span className="normal-case text-[9px] text-accent bg-accent-muted rounded px-1 py-0.5 leading-none">
-              {visible.length}/{sorted.length}
-            </span>
-          )}
-        </span>
-        <span>Type</span>
-        <span className="text-center">Null</span>
-        <span className="text-center">PK</span>
-        <span className="text-center">UQ</span>
-        <span>Note</span>
-        <span />
-        <span />
-        <span />
-      </div>
+      {/* Filter count indicator when filtering */}
+      {q && (
+        <div className="px-2 py-0.5 text-[9px] text-accent bg-accent-muted/20 border-b border-border-default/50">
+          {visible.length}/{sorted.length} columns
+        </div>
+      )}
 
-      {/* Column rows */}
+      {/* Column rows - no header needed, layout is self-explanatory */}
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={q ? undefined : handleDragEnd}>
         <SortableContext items={sorted.map((c) => c.id)} strategy={verticalListSortingStrategy}>
           {visible.map((column) => (
