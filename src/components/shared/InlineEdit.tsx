@@ -78,7 +78,7 @@ export function InlineEdit({
     return (
       <span
         onClick={() => setIsEditing(true)}
-        className={`cursor-text rounded px-1.5 py-0.5 hover:bg-bg-hover transition-colors inline-block min-w-[2rem] ${
+        className={`cursor-text rounded px-1 py-0.5 hover:bg-bg-hover transition-colors inline-block min-w-[2rem] ${
           value ? 'text-text-primary' : 'text-text-placeholder'
         } ${className}`}
       >

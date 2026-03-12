@@ -149,7 +149,7 @@ export function EntityCardHeader({
   return (
     <div>
       {/* Primary header row - compact */}
-      <div className="flex items-center gap-1.5 px-2 py-1.5 border-b border-border-default bg-bg-tertiary/50 group/header rounded-t-lg">
+      <div className="flex items-center gap-1 px-1.5 py-1 border-b border-border-default bg-bg-tertiary/50 group/header rounded-t-lg">
         {/* Drag handle - hover only */}
         {dragHandle && (
           <button
@@ -213,12 +213,12 @@ export function EntityCardHeader({
           )}
         </div>
 
-        {/* Entity name */}
-        <div className="flex-1 min-w-0">
+        {/* Entity name - truncates to preserve layout */}
+        <div className="flex-1 min-w-0 overflow-hidden">
           <InlineEdit
             value={name}
             onSave={(v) => { updateEntity(entityId, { name: v }); updateFKRefs(entityId, name, v); }}
-            className="text-xs font-semibold truncate block"
+            className="text-[11px] font-semibold truncate block"
             placeholder="entity_name"
           />
         </div>
