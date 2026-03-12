@@ -147,15 +147,14 @@ export const ColumnRow = memo(function ColumnRow({ column, entityId, highlight }
       style={style}
       className={`border-b border-border-default/50 transition-colors ${isDragging ? 'opacity-50 bg-bg-hover' : ''} ${isMatch ? 'bg-accent-muted/30' : ''}`}
     >
-      {/* Landing-page style grid: NAME | TYPE | NULL | PK | expand */}
-      <div
-        className="grid grid-cols-[1fr_72px_28px_28px_16px] gap-0 items-center px-3 py-1 group hover:bg-bg-hover/50 transition-colors text-[10px]"
-        {...attributes}
-        {...listeners}
-        style={{ cursor: 'grab' }}
-      >
-        {/* Name - mono, truncates */}
-        <div className="relative min-w-0">
+      {/* Landing-page style grid: NAME | TYPE | NULL | PK | expand | delete */}
+      <div className="grid grid-cols-[1fr_72px_28px_28px_16px_16px] gap-0 items-center px-3 py-1 group hover:bg-bg-hover/50 transition-colors text-[10px]">
+        {/* Name - mono, truncates. Also serves as drag handle via the row background */}
+        <div
+          className="relative min-w-0 cursor-grab touch-none"
+          {...attributes}
+          {...listeners}
+        >
           <input
             ref={nameRef}
             type="text"
@@ -164,8 +163,7 @@ export const ColumnRow = memo(function ColumnRow({ column, entityId, highlight }
               updateColumn(entityId, column.id, { name: e.target.value });
               computeSuggestions(e.target.value);
             }}
-            onFocus={(e) => {
-              e.stopPropagation();
+            onFocus={() => {
               setEditingColumn(column.id);
               computeSuggestions(column.name);
             }}
@@ -191,7 +189,7 @@ export const ColumnRow = memo(function ColumnRow({ column, entityId, highlight }
               }
             }}
             placeholder="column_name"
-            className="font-mono text-[11px] bg-transparent outline-none text-text-primary placeholder:text-text-placeholder py-0 rounded hover:bg-bg-tertiary focus:bg-bg-tertiary transition-colors w-full min-w-0 truncate"
+            className="font-mono text-[11px] bg-transparent outline-none text-text-primary placeholder:text-text-placeholder py-0 rounded hover:bg-bg-tertiary focus:bg-bg-tertiary transition-colors w-full min-w-0 truncate cursor-text"
           />
           {suggestions.length > 0 && (
             <div
@@ -227,29 +225,19 @@ export const ColumnRow = memo(function ColumnRow({ column, entityId, highlight }
           )}
         </div>
 
-        {/* Type - colored like landing page */}
-        <span
-          className="text-accent/80 truncate cursor-pointer hover:text-accent transition-colors"
-          onClick={(e) => {
-            e.stopPropagation();
-            // Find the DataTypeSelect and open it programmatically
-            const el = e.currentTarget.querySelector('[data-type-trigger]') as HTMLButtonElement;
-            el?.click();
+        {/* Type selector - standalone, not wrapped */}
+        <DataTypeSelect
+          value={column.dataType}
+          onChange={(v: DataType) => {
+            updateColumn(entityId, column.id, { dataType: v });
+            if (v === 'enum') setExpanded(true);
           }}
-        >
-          <DataTypeSelect
-            value={column.dataType}
-            onChange={(v: DataType) => {
-              updateColumn(entityId, column.id, { dataType: v });
-              if (v === 'enum') setExpanded(true);
-            }}
-          />
-        </span>
+        />
 
         {/* Nullable - circle/dash indicator, click to toggle */}
         <button
           type="button"
-          onClick={(e) => { e.stopPropagation(); updateColumn(entityId, column.id, { nullable: !column.nullable }); }}
+          onClick={() => updateColumn(entityId, column.id, { nullable: !column.nullable })}
           className="text-center text-text-muted hover:text-text-secondary cursor-pointer transition-colors"
           title={column.nullable ? 'Nullable (click to toggle)' : 'Not null (click to toggle)'}
         >
@@ -259,7 +247,7 @@ export const ColumnRow = memo(function ColumnRow({ column, entityId, highlight }
         {/* PK - star/dash indicator, click to toggle */}
         <button
           type="button"
-          onClick={(e) => { e.stopPropagation(); updateColumn(entityId, column.id, { primaryKey: !column.primaryKey }); }}
+          onClick={() => updateColumn(entityId, column.id, { primaryKey: !column.primaryKey })}
           className={`text-center cursor-pointer transition-colors ${column.primaryKey ? 'text-warning' : 'text-text-muted hover:text-text-secondary'}`}
           title={column.primaryKey ? 'Primary Key (click to toggle)' : 'Not PK (click to toggle)'}
         >
@@ -270,7 +258,7 @@ export const ColumnRow = memo(function ColumnRow({ column, entityId, highlight }
         <button
           type="button"
           title={expanded ? 'Collapse' : 'Edit details'}
-          onClick={(e) => { e.stopPropagation(); setExpanded(!expanded); }}
+          onClick={() => setExpanded(!expanded)}
           className={`justify-self-center cursor-pointer transition-all ${
             hasExtra || expanded
               ? 'text-accent opacity-100'
@@ -282,6 +270,18 @@ export const ColumnRow = memo(function ColumnRow({ column, entityId, highlight }
             fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"
           >
             <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+
+        {/* Delete column */}
+        <button
+          type="button"
+          onClick={() => removeColumn(entityId, column.id)}
+          title="Delete column"
+          className="justify-self-center opacity-0 group-hover:opacity-100 transition-opacity text-text-muted hover:text-danger cursor-pointer"
+        >
+          <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
       </div>

@@ -31,7 +31,7 @@ interface EntityStore {
 const makeDefaultColumn = (order: number): Column => ({
   id: createId(),
   name: '',
-  dataType: 'string' as DataType,
+  dataType: 'varchar' as DataType,
   nullable: false,
   primaryKey: false,
   unique: false,
