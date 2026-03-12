@@ -98,6 +98,7 @@ export const EntityCard = memo(function EntityCard({ entity, dragHandle, highlig
         onColumnFilterChange={setColumnFilter}
         typeBreakdown={typeBreakdown}
         columnMatchCount={columnMatchCount}
+        lineBreak={entity.lineBreak}
       />
       {!entity.collapsed && (
         <ColumnTable columns={entity.columns} entityId={entity.id} highlight={highlight} filter={columnFilter} />

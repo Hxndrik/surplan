@@ -43,6 +43,7 @@ interface EntityCardHeaderProps {
   onColumnFilterChange?: (v: string) => void;
   typeBreakdown?: string;
   columnMatchCount?: number;
+  lineBreak?: boolean;
 }
 
 export function EntityCardHeader({
@@ -63,6 +64,7 @@ export function EntityCardHeader({
   onColumnFilterChange,
   typeBreakdown,
   columnMatchCount,
+  lineBreak,
 }: EntityCardHeaderProps) {
   const updateEntity = useEntityStore((s) => s.updateEntity);
   const removeEntity = useEntityStore((s) => s.removeEntity);
@@ -263,6 +265,22 @@ export function EntityCardHeader({
             </span>
           )}
         </div>
+
+        {/* Line break toggle */}
+        <button
+          type="button"
+          onClick={() => updateEntity(entityId, { lineBreak: !lineBreak })}
+          className={`flex-shrink-0 p-0.5 transition-all cursor-pointer rounded ${
+            lineBreak
+              ? 'text-accent opacity-100'
+              : 'text-text-muted opacity-0 group-hover/header:opacity-100 hover:text-text-secondary'
+          }`}
+          title={lineBreak ? 'Remove line break after this entity' : 'Add line break after this entity'}
+        >
+          <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3 4h18M3 8h14a2 2 0 012 2v1a2 2 0 01-2 2H9m0 0l3-3m-3 3l3 3M3 16h6" />
+          </svg>
+        </button>
 
         {/* Overflow menu - replaces individual action buttons */}
         <div className="relative flex-shrink-0" ref={menuRef}>
