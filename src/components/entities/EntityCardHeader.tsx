@@ -44,6 +44,8 @@ interface EntityCardHeaderProps {
   typeBreakdown?: string;
   columnMatchCount?: number;
   lineBreak?: boolean;
+  widthSpan?: number;
+  onResetWidth?: () => void;
 }
 
 export function EntityCardHeader({
@@ -65,6 +67,8 @@ export function EntityCardHeader({
   typeBreakdown,
   columnMatchCount,
   lineBreak,
+  widthSpan = 1,
+  onResetWidth,
 }: EntityCardHeaderProps) {
   const updateEntity = useEntityStore((s) => s.updateEntity);
   const removeEntity = useEntityStore((s) => s.removeEntity);
@@ -281,6 +285,20 @@ export function EntityCardHeader({
             <path strokeLinecap="round" strokeLinejoin="round" d="M3 4h18M3 8h14a2 2 0 012 2v1a2 2 0 01-2 2H9m0 0l3-3m-3 3l3 3M3 16h6" />
           </svg>
         </button>
+
+        {/* Reset width button - only visible when widened */}
+        {widthSpan > 1 && onResetWidth && (
+          <button
+            type="button"
+            onClick={onResetWidth}
+            className="flex-shrink-0 p-0.5 text-accent hover:text-accent/70 transition-colors cursor-pointer rounded"
+            title={`Reset width (currently ${widthSpan} columns)`}
+          >
+            <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 9V4.5M9 9H4.5M9 9L3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5l5.25 5.25" />
+            </svg>
+          </button>
+        )}
 
         {/* Overflow menu - replaces individual action buttons */}
         <div className="relative flex-shrink-0" ref={menuRef}>
