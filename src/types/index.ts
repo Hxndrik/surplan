@@ -62,6 +62,7 @@ export interface Entity {
   updatedAt: number;
   tags: string[];
   lineBreak?: boolean;
+  widthSpan?: number; // grid column span 1–8, default 1
 }
 
 export type Estimate = '' | '1' | '2' | '3' | '5' | '8' | '13' | '?';

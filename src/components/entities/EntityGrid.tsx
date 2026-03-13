@@ -12,6 +12,8 @@ import { TemplatesModal } from './TemplatesModal';
 import { ErdView } from './ErdView';
 import { RelationshipMatrix } from './RelationshipMatrix';
 
+const COL_SPAN_CLASSES = ['col-span-1', 'col-span-1', 'col-span-2', 'col-span-3', 'col-span-4', 'col-span-5', 'col-span-6', 'col-span-7', 'col-span-8'];
+
 function SortableEntityCard({ entity, highlight, flash, cardRef, columnMatchCount }: {
   entity: Entity;
   highlight?: string;
@@ -21,11 +23,12 @@ function SortableEntityCard({ entity, highlight, flash, cardRef, columnMatchCoun
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: entity.id });
   const style = { transform: CSS.Transform.toString(transform), transition };
+  const colSpan = COL_SPAN_CLASSES[Math.max(1, Math.min(8, entity.widthSpan ?? 1))];
   return (
     <div
       ref={(el) => { setNodeRef(el); cardRef?.(el); }}
       style={style}
-      className={`${isDragging ? 'opacity-40 z-10' : ''} ${flash ? 'ring-2 ring-accent animate-pulse rounded-xl' : ''}`}
+      className={`${colSpan} ${isDragging ? 'opacity-40 z-10' : ''} ${flash ? 'ring-2 ring-accent animate-pulse rounded-xl' : ''}`}
     >
       <EntityCard entity={entity} dragHandle={{ ...listeners, ...attributes }} highlight={highlight} columnMatchCount={columnMatchCount} />
     </div>

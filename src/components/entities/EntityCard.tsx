@@ -1,4 +1,4 @@
-import { memo, useState } from 'react';
+import { memo, useState, useRef, useCallback } from 'react';
 import type React from 'react';
 import type { Entity, CopyFormat } from '../../types';
 import { EntityCardHeader } from './EntityCardHeader';
@@ -33,9 +33,46 @@ interface EntityCardProps {
 
 export const EntityCard = memo(function EntityCard({ entity, dragHandle, highlight, columnMatchCount }: EntityCardProps) {
   const allEntities = useEntityStore((s) => s.entities);
+  const updateEntity = useEntityStore((s) => s.updateEntity);
   const warnings = getEntityWarnings(entity, allEntities);
   const [copiedFormat, setCopiedFormat] = useState<CopyFormat | null>(null);
   const [columnFilter, setColumnFilter] = useState('');
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [isResizing, setIsResizing] = useState(false);
+
+  const handleResizeStart = useCallback((e: React.PointerEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const card = cardRef.current;
+    if (!card) return;
+
+    const startX = e.clientX;
+    const startWidth = card.getBoundingClientRect().width;
+    const currentSpan = entity.widthSpan ?? 1;
+    const singleColWidth = startWidth / currentSpan;
+
+    setIsResizing(true);
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+
+    let lastSpan = currentSpan;
+    const onMove = (ev: PointerEvent) => {
+      const delta = ev.clientX - startX;
+      const newSpan = Math.max(1, Math.min(8, Math.round((startWidth + delta) / singleColWidth)));
+      if (newSpan !== lastSpan) {
+        lastSpan = newSpan;
+        updateEntity(entity.id, { widthSpan: newSpan });
+      }
+    };
+
+    const onUp = () => {
+      setIsResizing(false);
+      document.removeEventListener('pointermove', onMove);
+      document.removeEventListener('pointerup', onUp);
+    };
+
+    document.addEventListener('pointermove', onMove);
+    document.addEventListener('pointerup', onUp);
+  }, [entity.id, entity.widthSpan, updateEntity]);
 
   const copyAs = async (format: CopyFormat) => {
     try {
@@ -77,7 +114,8 @@ export const EntityCard = memo(function EntityCard({ entity, dragHandle, highlig
 
   return (
     <div
-      className="bg-bg-secondary border border-border-default rounded-lg hover:border-border-active transition-colors animate-fade-in-up"
+      ref={cardRef}
+      className={`relative bg-bg-secondary border border-border-default rounded-lg hover:border-border-active transition-colors animate-fade-in-up ${isResizing ? 'select-none' : ''}`}
       style={{ borderLeftColor: entity.color, borderLeftWidth: '3px' }}
     >
       <EntityCardHeader
@@ -99,10 +137,18 @@ export const EntityCard = memo(function EntityCard({ entity, dragHandle, highlig
         typeBreakdown={typeBreakdown}
         columnMatchCount={columnMatchCount}
         lineBreak={entity.lineBreak}
+        widthSpan={entity.widthSpan ?? 1}
+        onResetWidth={() => updateEntity(entity.id, { widthSpan: 1 })}
       />
       {!entity.collapsed && (
         <ColumnTable columns={entity.columns} entityId={entity.id} highlight={highlight} filter={columnFilter} />
       )}
+      {/* Right-edge resize handle */}
+      <div
+        onPointerDown={handleResizeStart}
+        className={`absolute top-0 right-0 bottom-0 w-1.5 cursor-ew-resize rounded-r-lg opacity-0 hover:opacity-100 transition-opacity ${isResizing ? 'opacity-100 bg-accent/40' : 'hover:bg-accent/30'} group-hover:opacity-100`}
+        title="Drag to resize width"
+      />
     </div>
   );
 });
