@@ -63,6 +63,8 @@ export function EntityGrid({ onExport }: EntityGridProps) {
   const [showWarnings, setShowWarnings] = useState(false);
   const [filterWarnings, setFilterWarnings] = useState(false);
   const [flashEntityId, setFlashEntityId] = useState<string | null>(null);
+  const [importDropdownOpen, setImportDropdownOpen] = useState(false);
+  const importDropdownRef = useRef<HTMLDivElement>(null);
   const entityCardRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const searchRef = useRef<HTMLInputElement>(null);
 
@@ -97,6 +99,17 @@ export function EntityGrid({ onExport }: EntityGridProps) {
     window.addEventListener('surplan:focus-entity', handler);
     return () => window.removeEventListener('surplan:focus-entity', handler);
   }, [handleEntityFocusFromErd]);
+
+  useEffect(() => {
+    if (!importDropdownOpen) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (importDropdownRef.current && !importDropdownRef.current.contains(e.target as Node)) {
+        setImportDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [importDropdownOpen]);
 
 
   const totalColumns = entities.reduce((sum, e) => sum + e.columns.length, 0);
@@ -387,9 +400,10 @@ export function EntityGrid({ onExport }: EntityGridProps) {
         </div>
 
         {/* Import dropdown */}
-        <div className="relative group">
+        <div className="relative" ref={importDropdownRef}>
           <button
             type="button"
+            onClick={() => setImportDropdownOpen((o) => !o)}
             className="flex items-center gap-1.5 text-xs text-text-secondary border border-border-default hover:border-border-active hover:text-text-primary rounded-lg px-3 py-1.5 transition-colors cursor-pointer"
             title="Import entities"
           >
@@ -401,24 +415,26 @@ export function EntityGrid({ onExport }: EntityGridProps) {
               <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
             </svg>
           </button>
-          <div className="absolute right-0 top-full mt-1 w-36 bg-bg-secondary border border-border-default rounded-lg shadow-xl overflow-hidden z-20 hidden group-hover:block">
-            <button
-              type="button"
-              onClick={() => window.dispatchEvent(new Event("surplan:open-sql-import"))}
-              className="w-full flex items-center gap-2 px-3 py-2 text-left text-xs text-text-secondary hover:bg-bg-hover hover:text-text-primary transition-colors cursor-pointer"
-            >
-              <span className="text-text-muted font-mono text-[10px]">SQL</span>
-              SQL / Prisma
-            </button>
-            <button
-              type="button"
-              onClick={() => window.dispatchEvent(new Event('surplan:open-json-import'))}
-              className="w-full flex items-center gap-2 px-3 py-2 text-left text-xs text-text-secondary hover:bg-bg-hover hover:text-text-primary transition-colors cursor-pointer border-t border-border-default"
-            >
-              <span className="text-text-muted font-mono text-[10px]">{'{}'}</span>
-              JSON / CSV
-            </button>
-          </div>
+          {importDropdownOpen && (
+            <div className="absolute right-0 top-full mt-1 w-36 bg-bg-secondary border border-border-default rounded-lg shadow-xl overflow-hidden z-20">
+              <button
+                type="button"
+                onClick={() => { setImportDropdownOpen(false); window.dispatchEvent(new Event("surplan:open-sql-import")); }}
+                className="w-full flex items-center gap-2 px-3 py-2 text-left text-xs text-text-secondary hover:bg-bg-hover hover:text-text-primary transition-colors cursor-pointer"
+              >
+                <span className="text-text-muted font-mono text-[10px]">SQL</span>
+                SQL / Prisma
+              </button>
+              <button
+                type="button"
+                onClick={() => { setImportDropdownOpen(false); window.dispatchEvent(new Event('surplan:open-json-import')); }}
+                className="w-full flex items-center gap-2 px-3 py-2 text-left text-xs text-text-secondary hover:bg-bg-hover hover:text-text-primary transition-colors cursor-pointer border-t border-border-default"
+              >
+                <span className="text-text-muted font-mono text-[10px]">{'{}'}</span>
+                JSON / CSV
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Templates button */}
